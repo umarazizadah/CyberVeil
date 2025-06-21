@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 6135de3e5e727f840aeda0ac6cac551e
+labels:
+- Pattern
+- Flesh
+- Organic
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 13237
+  packageName: Nature textures pack
+  packageVersion: 1.0
+  assetPath: Assets/Nature textures pack/Flesh/Flesh Mat.mat
+  uploadId: 118

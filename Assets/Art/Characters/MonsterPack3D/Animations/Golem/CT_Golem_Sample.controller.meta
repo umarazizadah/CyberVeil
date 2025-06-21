@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 2deee33a29dd49841b7490964cc9d6e0
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 289042
+  packageName: MonsterPack3D
+  packageVersion: 1.0
+  assetPath: Assets/MonsterPack3D/Animations/Golem/CT_Golem_Sample.controller
+  uploadId: 696663

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 9cde348ef8613af4cbed36f086fdd58d
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 289042
+  packageName: MonsterPack3D
+  packageVersion: 1.0
+  assetPath: Assets/MonsterPack3D/Animations/Golem/SA_Golem_Idle.anim
+  uploadId: 696663

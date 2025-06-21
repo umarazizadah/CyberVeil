@@ -1,0 +1,20 @@
+fileFormatVersion: 2
+guid: 2e733edc72b88b240b566573ec362d5f
+labels:
+- Nature
+- Pattern
+- Wood
+- Coal
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 13237
+  packageName: Nature textures pack
+  packageVersion: 1.0
+  assetPath: Assets/Nature textures pack/Coal/Coal Mat.mat
+  uploadId: 118

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 80017afd1957a7a42b4747d3c6af9b1b
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 289042
+  packageName: MonsterPack3D
+  packageVersion: 1.0
+  assetPath: Assets/MonsterPack3D/Animations/Golem/SA_Golem_Damage.anim
+  uploadId: 696663

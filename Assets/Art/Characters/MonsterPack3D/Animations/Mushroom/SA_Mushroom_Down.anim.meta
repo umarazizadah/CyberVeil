@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 12dc6697f842fa44c9c8633a474a9b1d
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 289042
+  packageName: MonsterPack3D
+  packageVersion: 1.0
+  assetPath: Assets/MonsterPack3D/Animations/Mushroom/SA_Mushroom_Down.anim
+  uploadId: 696663

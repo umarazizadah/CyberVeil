@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 2d51756152c3ba441a020cc2da298e96
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 289042
+  packageName: MonsterPack3D
+  packageVersion: 1.0
+  assetPath: Assets/MonsterPack3D/Animations/Mushroom/SA_Mushroom_Idle.anim
+  uploadId: 696663

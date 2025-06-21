@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 473ca38edddff04498d723d03626915c
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 289042
+  packageName: MonsterPack3D
+  packageVersion: 1.0
+  assetPath: Assets/MonsterPack3D/Animations/Bat/CT_Bat_Sample.controller
+  uploadId: 696663

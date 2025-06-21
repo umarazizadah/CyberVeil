@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: 749e5659fe935724cb09c70ec08c2355
+labels:
+- Hens
+- Leafs
+- Nature
+- Pattern
+- Plants
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 13237
+  packageName: Nature textures pack
+  packageVersion: 1.0
+  assetPath: Assets/Nature textures pack/Hens & chicks/Hens & chicks Mat.mat
+  uploadId: 118

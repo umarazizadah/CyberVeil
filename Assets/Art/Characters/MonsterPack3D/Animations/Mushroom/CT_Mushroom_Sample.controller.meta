@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: c156d50ce35a8cc46b1637e13a15ebdc
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 289042
+  packageName: MonsterPack3D
+  packageVersion: 1.0
+  assetPath: Assets/MonsterPack3D/Animations/Mushroom/CT_Mushroom_Sample.controller
+  uploadId: 696663

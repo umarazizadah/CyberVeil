@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: af20123fcd3abce4682baa56075aefcb
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 289042
+  packageName: MonsterPack3D
+  packageVersion: 1.0
+  assetPath: Assets/MonsterPack3D/Animations/Bat/SA_Bat_Flap.anim
+  uploadId: 696663

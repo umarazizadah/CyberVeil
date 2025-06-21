@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: e4bb0655e4b406f4eb69b05cb1b42f3e
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 289042
+  packageName: MonsterPack3D
+  packageVersion: 1.0
+  assetPath: Assets/MonsterPack3D/Animations/Bat/SA_Bat_Bite.anim
+  uploadId: 696663

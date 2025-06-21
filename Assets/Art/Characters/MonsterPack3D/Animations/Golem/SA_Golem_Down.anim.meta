@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 956c0c245261e5a4bb2d037742cf6872
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 289042
+  packageName: MonsterPack3D
+  packageVersion: 1.0
+  assetPath: Assets/MonsterPack3D/Animations/Golem/SA_Golem_Down.anim
+  uploadId: 696663

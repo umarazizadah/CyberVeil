@@ -1,0 +1,20 @@
+fileFormatVersion: 2
+guid: b84d2521268000d4b86efec10eb171be
+labels:
+- Nature
+- Pattern
+- Almonds
+- Seeds
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 13237
+  packageName: Nature textures pack
+  packageVersion: 1.0
+  assetPath: Assets/Nature textures pack/Seeds almonds/Seeds almonds Mat.mat
+  uploadId: 118

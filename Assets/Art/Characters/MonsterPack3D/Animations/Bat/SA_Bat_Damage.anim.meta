@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: e1e5f0eb3e549e34b968942c264bb2c7
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 289042
+  packageName: MonsterPack3D
+  packageVersion: 1.0
+  assetPath: Assets/MonsterPack3D/Animations/Bat/SA_Bat_Damage.anim
+  uploadId: 696663

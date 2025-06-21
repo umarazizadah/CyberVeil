@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 4d94d5c6fd243444784f7abaefa7c70e
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 289042
+  packageName: MonsterPack3D
+  packageVersion: 1.0
+  assetPath: Assets/MonsterPack3D/Animations/Mushroom/SA_Mushroom_Walk.anim
+  uploadId: 696663

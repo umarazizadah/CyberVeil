@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: b9cb89fa49120a54b959c0c609f54e3d
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 191256
+  packageName: URP Dissolve 2020
+  packageVersion: 2020.3.0
+  assetPath: Assets/ShaderGraph_Dissolve/readme.pdf
+  uploadId: 533539

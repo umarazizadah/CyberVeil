@@ -1,0 +1,20 @@
+fileFormatVersion: 2
+guid: b5e60597bad83f54cae1e035edc2de26
+labels:
+- Nature
+- Pattern
+- Ground
+- Plants
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 13237
+  packageName: Nature textures pack
+  packageVersion: 1.0
+  assetPath: Assets/Nature textures pack/Green plants/Green plants Mat.mat
+  uploadId: 118

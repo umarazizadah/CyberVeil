@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 606ed5d3ed88c8a45be326cc94e3d0a1
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 289042
+  packageName: MonsterPack3D
+  packageVersion: 1.0
+  assetPath: Assets/MonsterPack3D/Animations/Bat/SA_Bat_Down.anim
+  uploadId: 696663

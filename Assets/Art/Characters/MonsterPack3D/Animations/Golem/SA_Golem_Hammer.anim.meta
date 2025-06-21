@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 93bbb9d463f2d484d855af91d826c40e
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 289042
+  packageName: MonsterPack3D
+  packageVersion: 1.0
+  assetPath: Assets/MonsterPack3D/Animations/Golem/SA_Golem_Hammer.anim
+  uploadId: 696663

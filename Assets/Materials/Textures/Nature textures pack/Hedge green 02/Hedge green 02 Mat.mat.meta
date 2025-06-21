@@ -1,0 +1,20 @@
+fileFormatVersion: 2
+guid: df08cb7422cd29b4d90828497516ba73
+labels:
+- Hedge
+- Leafs
+- Nature
+- Pattern
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 13237
+  packageName: Nature textures pack
+  packageVersion: 1.0
+  assetPath: Assets/Nature textures pack/Hedge green 02/Hedge green 02 Mat.mat
+  uploadId: 118

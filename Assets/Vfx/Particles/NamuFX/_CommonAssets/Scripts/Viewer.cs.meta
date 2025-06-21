@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: ada48fc69a469554591604581e984bd2
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 248665
+  packageName: Simple Stylized Slash Pack 2
+  packageVersion: 1.0
+  assetPath: Assets/NamuFX/_CommonAssets/Scripts/Viewer.cs
+  uploadId: 584375

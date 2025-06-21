@@ -1,0 +1,20 @@
+fileFormatVersion: 2
+guid: ab7c155c57c124a458046ce81042e990
+labels:
+- Nature
+- Pattern
+- Wood
+- Woodchips
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 13237
+  packageName: Nature textures pack
+  packageVersion: 1.0
+  assetPath: Assets/Nature textures pack/Woodchips/Woodchips Mat.mat
+  uploadId: 118

@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: 004df0b451eb84a4ea3309166f043992
+labels:
+- Fruits
+- Nature
+- Pattern
+- Seeds
+- Olive
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 13237
+  packageName: Nature textures pack
+  packageVersion: 1.0
+  assetPath: Assets/Nature textures pack/Seeds olive/Seeds olive Mat.mat
+  uploadId: 118

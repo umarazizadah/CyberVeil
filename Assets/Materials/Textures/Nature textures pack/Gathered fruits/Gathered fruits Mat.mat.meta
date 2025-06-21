@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 3d222df904014274092bb047649a65d9
+labels:
+- Nature
+- Pattern
+- Fruits
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 13237
+  packageName: Nature textures pack
+  packageVersion: 1.0
+  assetPath: Assets/Nature textures pack/Gathered fruits/Gathered fruits Mat.mat
+  uploadId: 118

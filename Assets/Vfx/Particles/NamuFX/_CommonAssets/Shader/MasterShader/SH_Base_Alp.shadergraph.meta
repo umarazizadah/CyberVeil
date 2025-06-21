@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: ffa05d119916ad44782487ca457e0015
+ScriptedImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 2
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+  script: {fileID: 11500000, guid: 625f186215c104763be7675aa2d941aa, type: 3}
+AssetOrigin:
+  serializedVersion: 1
+  productId: 248665
+  packageName: Simple Stylized Slash Pack 2
+  packageVersion: 1.0
+  assetPath: Assets/NamuFX/_CommonAssets/Shader/MasterShader/SH_Base_Alp.shadergraph
+  uploadId: 584375
