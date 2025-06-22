@@ -2,7 +2,8 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using CyberVeil.VFX;
-
+using System.Runtime.InteropServices;
+using CyberVeil.Core;
 
 namespace CyberVeil.Player
 {
@@ -36,7 +37,7 @@ namespace CyberVeil.Player
         private PlayerDash playerDash;
         private PlayerSprint playerSprint;
         private PlayerAttack playerAttack;
-        private PlayerStateMachine stateMachine;
+        private CharacterStateMachine stateMachine;
 
         // Uses unitys input handling system to handle movement input, stores input vector for processing later
         public void onMove(InputAction.CallbackContext context)
@@ -52,7 +53,7 @@ namespace CyberVeil.Player
             playerDash = GetComponent<PlayerDash>();
             playerSprint = GetComponent<PlayerSprint>();
             playerAttack = GetComponent<PlayerAttack>();
-            stateMachine = GetComponent<PlayerStateMachine>();
+            stateMachine = GetComponent<CharacterStateMachine>();
             speed = defaultSpeed;
         }
 
@@ -121,7 +122,7 @@ namespace CyberVeil.Player
                 transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
             }
 
-            if (stateMachine.CurrentState == PlayerState.Attacking) // Fully locks movement during attacks
+            if (stateMachine.CurrentState == CharacterState.Attacking) // Fully locks movement during attacks
                 return;
 
 
@@ -132,7 +133,7 @@ namespace CyberVeil.Player
             {
                 movement = lastDirection;
             }
-            else if (playerSprint != null && stateMachine.CurrentState == PlayerState.Sprinting) // Sprint - faster speed
+            else if (playerSprint != null && stateMachine.CurrentState == CharacterState.Sprinting) // Sprint - faster speed
             {
                 speed = 5.5f;
                 movement = moveDirection * speed;
@@ -158,19 +159,19 @@ namespace CyberVeil.Player
 
         private void UpdateMovementState() //keeps annimations fully synced with players movement
         {
-            if (stateMachine.CurrentState == PlayerState.Attacking || stateMachine.CurrentState == PlayerState.Damaged)
+            if (stateMachine.CurrentState == CharacterState.Attacking || stateMachine.CurrentState == CharacterState.Damaged)
                 return;
 
             if (move.magnitude > 0.1f)
             {
-                if (playerSprint != null && stateMachine.CurrentState == PlayerState.Sprinting)
-                    stateMachine.ChangeState(PlayerState.Sprinting);
+                if (playerSprint != null && stateMachine.CurrentState == CharacterState.Sprinting)
+                    stateMachine.ChangeState(CharacterState.Sprinting);
                 else
-                    stateMachine.ChangeState(PlayerState.Moving);
+                    stateMachine.ChangeState(CharacterState.Moving);
             }
             else
             {
-                stateMachine.ChangeState(PlayerState.Idle);
+                stateMachine.ChangeState(CharacterState.Idle);
             }
         }
 

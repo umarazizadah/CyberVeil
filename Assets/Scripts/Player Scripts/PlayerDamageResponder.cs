@@ -1,4 +1,5 @@
 using CyberVeil.Combat;
+using CyberVeil.Core;
 using CyberVeil.Systems;
 using UnityEngine;
 namespace CyberVeil.Player
@@ -9,22 +10,22 @@ namespace CyberVeil.Player
     /// </summary>
     public class PlayerDamageResponder : MonoBehaviour, IDamageStateResponder
     {
-        private PlayerStateMachine stateMachine;
+        private CharacterStateMachine stateMachine;
         void Start()
         {
-            stateMachine = GetComponent<PlayerStateMachine>();
+            stateMachine = GetComponent<CharacterStateMachine>();
         }
 
         public void OnDamaged()
         {
-            stateMachine.ChangeState(PlayerState.Damaged); // Switch the player's state to Damaged
+            stateMachine.ChangeState(CharacterState.Damaged); // Switch the player's state to Damaged
             HitstopManager.Instance.DoHitstop(0.05f, 0f); // Triggers hitstop effect
 
         }
 
         public void OnDamageAnimationFinished()
         {
-            stateMachine.ChangeState(PlayerState.Idle);
+            stateMachine.ChangeState(CharacterState.Idle);
         }
     }
 }

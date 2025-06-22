@@ -3,6 +3,7 @@ using UnityEngine.InputSystem;
 using CyberVeil.Systems;
 using CyberVeil.Combat;
 using CyberVeil.VFX;
+using CyberVeil.Core;
 
 namespace CyberVeil.Player
 {
@@ -31,12 +32,12 @@ namespace CyberVeil.Player
         public toggleAxe2 toggleAxe2;
 
         private PlayerController playerController;
-        private PlayerStateMachine stateMachine;
+        private CharacterStateMachine stateMachine;
 
         private void Start()
         {
             playerController = GetComponent<PlayerController>();
-            stateMachine = GetComponent<PlayerStateMachine>();
+            stateMachine = GetComponent<CharacterStateMachine>();
 
             toggleAxe.HideAxe();
             toggleAxe2.HideAxe2();
@@ -44,7 +45,7 @@ namespace CyberVeil.Player
 
         public void HandleAttackInput()
         {
-            if (stateMachine.CurrentState != PlayerState.Attacking
+            if (stateMachine.CurrentState != CharacterState.Attacking
                 && canAttack
                 && Mouse.current != null
                 && Mouse.current.leftButton.wasPressedThisFrame)
@@ -65,7 +66,7 @@ namespace CyberVeil.Player
 
         private void StartAttack()
         {
-            stateMachine.ChangeState(PlayerState.Attacking);
+            stateMachine.ChangeState(CharacterState.Attacking);
             Invoke(nameof(EndAttack), attackDuration);
 
             // Apply combat damage using CombatManager
@@ -79,7 +80,7 @@ namespace CyberVeil.Player
         {
             toggleAxe.HideAxe();
             toggleAxe2.HideAxe2();
-            stateMachine.ChangeState(PlayerState.Idle);
+            stateMachine.ChangeState(CharacterState.Idle);
         }
 
         private void AttackMovementBoost()

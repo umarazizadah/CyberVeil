@@ -1,15 +1,16 @@
+
 using UnityEngine;
 
-namespace CyberVeil.Player
+namespace CyberVeil.Core
 {
     /// <summary>
     /// Controls transitions between player animations based on state changes
     /// Listens to the PlayerStateMachine and drives Animator transitions accordingly.
     /// </summary>
-    public class PlayerAnimationController : MonoBehaviour
+    public class CharacterAnimationController : MonoBehaviour
     {
         private Animator animator;
-        private PlayerStateMachine stateMachine;
+        private CharacterStateMachine stateMachine;
 
         // Using Animator.StringToHash to avoid expensive string lookups at runtime
         private static readonly int animIDIdle = Animator.StringToHash("Idle");
@@ -21,7 +22,7 @@ namespace CyberVeil.Player
         private void Start()
         {
             animator = GetComponent<Animator>();
-            stateMachine = GetComponent<PlayerStateMachine>();
+            stateMachine = GetComponent<CharacterStateMachine>();
 
             // Subscribe to state change events from the player
             stateMachine.OnStateChange += OnPlayerStateChanged; // WHenever the players state changes, run the method
@@ -31,26 +32,26 @@ namespace CyberVeil.Player
         /// Triggered whenever the player state changes
         /// Crossfades into the appropriate animation
         /// </summary>
-        private void OnPlayerStateChanged(PlayerState newState)
+        private void OnPlayerStateChanged(CharacterState newState)
         {
             switch (newState)
             {
-                case PlayerState.Idle:
+                case CharacterState.Idle:
                     animator.CrossFade(animIDIdle, 0.2f, 0);
                     break;
-                case PlayerState.Moving:
+                case CharacterState.Moving:
                     animator.CrossFade(animIDMove, 0.2f, 0);
                     break;
-                case PlayerState.Dashing:
+                case CharacterState.Dashing:
                     animator.CrossFade(animIDSprint, 0.2f, 0);
                     break;
-                case PlayerState.Sprinting:
+                case CharacterState.Sprinting:
                     animator.CrossFade(animIDSprint, 0.2f, 0);
                     break;
-                case PlayerState.Attacking:
+                case CharacterState.Attacking:
                     animator.CrossFade(animIDAttack, 0.1f, 0);
                     break;
-                case PlayerState.Damaged:
+                case CharacterState.Damaged:
                     animator.CrossFade(animIDDamage, 0.1f, 0);
                     break;
             }

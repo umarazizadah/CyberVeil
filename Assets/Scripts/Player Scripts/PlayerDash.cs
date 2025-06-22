@@ -3,11 +3,12 @@ using UnityEngine.InputSystem;
 using System.Collections;
 using CyberVeil.VFX;
 using CyberVeil.Systems;
+using CyberVeil.Core;
 
 namespace CyberVeil.Player
 {
     [RequireComponent(typeof(CharacterController))]
-    [RequireComponent(typeof(PlayerStateMachine))]
+    [RequireComponent(typeof(CharacterStateMachine))]
     /// <summary>
     /// Handles the player's dash ability including movement, cooldown, VFX, FOV adjustment, and dissolve effects
     /// </summary>
@@ -28,7 +29,7 @@ namespace CyberVeil.Player
 
         [Header("References")]
         public DissolveEffectHandler dissolveHandler;
-        private PlayerStateMachine playerState; 
+        private CharacterStateMachine playerState; 
         private CharacterController controller;
 
         private bool isDashing = false;
@@ -39,7 +40,7 @@ namespace CyberVeil.Player
 
         private void Start()
         {
-            playerState = GetComponent<PlayerStateMachine>();
+            playerState = GetComponent<CharacterStateMachine>();
             controller = GetComponent<CharacterController>();
             if (mainCam == null) mainCam = Camera.main;
             originalFOV = mainCam.fieldOfView;
@@ -53,7 +54,7 @@ namespace CyberVeil.Player
 
         public void HandleDashInput()
         {
-            if (Keyboard.current?.spaceKey.wasPressedThisFrame == true && canDash && !isDashing && playerState.CurrentState != PlayerState.Attacking)
+            if (Keyboard.current?.spaceKey.wasPressedThisFrame == true && canDash && !isDashing && playerState.CurrentState != CharacterState.Attacking)
             {
                 StartCoroutine(PerformDash());
             }
