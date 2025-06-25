@@ -54,7 +54,22 @@ namespace CyberVeil.Systems
                 GameObject enemyPrefab = wave.enemyPrefabs[UnityEngine.Random.Range(0, wave.enemyPrefabs.Length)];
                 Transform spawnPoint = spawnPoints[UnityEngine.Random.Range(0, spawnPoints.Length)];
 
-                Instantiate(enemyPrefab, spawnPoint.position, spawnPoint.rotation);
+                GameObject enemyInstance = Instantiate(enemyPrefab, spawnPoint.position, spawnPoint.rotation);
+
+                // Check if the enemy has an EnemyPatrol script
+                EnemyPatrol patrol = enemyInstance.GetComponent<EnemyPatrol>();
+                if (patrol != null && spawnPoint.childCount > 0)
+                {
+                    // Gather all children of the spawn point as patrol points
+                    Transform[] patrolPoints = new Transform[spawnPoint.childCount];
+                    for (int j = 0; j < spawnPoint.childCount; j++)
+                    {
+                        patrolPoints[j] = spawnPoint.GetChild(j);
+                    }
+
+                    // Assign patrol points to the enemy
+                    patrol.AssignPatrolPoints(patrolPoints);
+                }
                 yield return new WaitForSeconds(wave.spawnRate);
             }
 

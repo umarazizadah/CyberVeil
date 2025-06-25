@@ -44,16 +44,19 @@ namespace CyberVeil.Systems
 
         private void Awake()
         {
-            instance = this; //sets up singleton
+            
+
+            instance = this;
+
             sfxAudioSource = gameObject.AddComponent<AudioSource>();
 
-            // Creates new child gameobject attacthed to soundmanager
+            // Only create one footstep audio source
             GameObject footstepObject = new GameObject("FootstepAudioSource");
             footstepObject.transform.SetParent(transform);
-            // Adds an AudioSource component to it and sets it to loop
             footstepAudioSource = footstepObject.AddComponent<AudioSource>();
             footstepAudioSource.loop = true;
         }
+
 
         private void Start()
         {
@@ -75,6 +78,8 @@ namespace CyberVeil.Systems
 
         public static void PlayWalkingSound(float volume)
         {
+            if (instance == null || instance.soundList == null || (int)SoundType.WALK >= instance.soundList.Length)
+                return;
             if (!instance.footstepAudioSource.isPlaying)
             {
                 // Pulls a random walk sound
@@ -91,6 +96,8 @@ namespace CyberVeil.Systems
 
         public static void StopWalkingSound()
         {
+            if (instance == null || instance.soundList == null || (int)SoundType.WALK >= instance.soundList.Length)
+                return;
             //Stop immediately, no waiting for clip to finish
             instance.footstepAudioSource.Stop();
         }

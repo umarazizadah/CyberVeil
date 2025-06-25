@@ -132,12 +132,15 @@ GameObject:
   - component: {fileID: 5241760820556995098}
   - component: {fileID: 4960314565273766514}
   - component: {fileID: 7237496539150975847}
-  - component: {fileID: 1990779667232353697}
   - component: {fileID: 2981623498236905782}
   - component: {fileID: 1433120210846305273}
   - component: {fileID: -5104994954129526559}
   - component: {fileID: 3651910222853798788}
   - component: {fileID: -2342688885975412050}
+  - component: {fileID: 6559222923957677714}
+  - component: {fileID: 3316468625554108676}
+  - component: {fileID: 6725774568482314579}
+  - component: {fileID: 4442456149898717617}
   m_Layer: 0
   m_Name: Mushroom
   m_TagString: Enemy
@@ -153,9 +156,9 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 426066099168787847}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0}
   m_LocalPosition: {x: 6.8058076, y: 1.3028085, z: 7.847369}
-  m_LocalScale: {x: 1.6435, y: 1.6435, z: 1.6435}
+  m_LocalScale: {x: 1.6434999, y: 1.6435, z: 1.6434999}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1930559582237687545}
@@ -174,22 +177,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a92ed4669e4b6174185dccf5d2c375ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerTransform: {fileID: 0}
   speed: 1.8
-  follow: 1
   attackRange: 2.2
-  attackCooldown: 2
-  damageRadius: 2
-  normalAttackDamage: 20
-  canLeap: 0
-  leapRange: 7
-  leapForce: 7
-  leapCooldown: 5
-  effect: {fileID: 0}
-  leapVol: 0.3
-  splatVol: 0.4
-  leapDamageRadius: 2
-  leapDamage: 20
+  detectionRange: 10
+  lastAttackTime: -999
+  currentAIState: 0
 --- !u!95 &5181165402527871176
 Animator:
   serializedVersion: 7
@@ -276,20 +268,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   knockbackForce: 1.2
   directionInfluence: 0.7
---- !u!114 &1990779667232353697
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 426066099168787847}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ed1541a43c74ce1408d17c6c79fe13aa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  currentAnimation: 
-  queuedAnimation: 
 --- !u!114 &2981623498236905782
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -370,6 +348,59 @@ MonoBehaviour:
   toggleAxe1: {fileID: 0}
   toggleAxe2: {fileID: 0}
   dissolveProperty: _Dissolve
+--- !u!114 &6559222923957677714
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 426066099168787847}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b051143651728f74bb8f598fc818a009, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  patrolPoints: []
+  patrolSpeed: 1.4
+  reachThreshold: 0.3
+--- !u!114 &3316468625554108676
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 426066099168787847}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 398ddd659d5193a4181389e2ea0761bc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &6725774568482314579
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 426066099168787847}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e6490fc093a0f4f4bad127df5edd69cd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &4442456149898717617
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 426066099168787847}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fba49c3cd6381c14a8510bd18009aa7b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  chaseSpeed: 1.8
+  rotationSpeed: 8
 --- !u!1 &546021040188208090
 GameObject:
   m_ObjectHideFlags: 0

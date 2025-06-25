@@ -12912,12 +12912,15 @@ GameObject:
   - component: {fileID: 1787451072232665211}
   - component: {fileID: 29921538420707197}
   - component: {fileID: 2077413056300206123}
-  - component: {fileID: 37117266046567200}
   - component: {fileID: 6999242623120960102}
   - component: {fileID: -5155915157582753015}
   - component: {fileID: -3731331388470417453}
   - component: {fileID: -7340461099912659302}
   - component: {fileID: -4232407353697056839}
+  - component: {fileID: 8594164270100327636}
+  - component: {fileID: 946910169626345073}
+  - component: {fileID: -6736712735464796415}
+  - component: {fileID: -8062204462726741376}
   m_Layer: 0
   m_Name: slime enemy ani (1)
   m_TagString: Enemy
@@ -12959,22 +12962,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a92ed4669e4b6174185dccf5d2c375ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerTransform: {fileID: 0}
   speed: 1
   follow: 1
   attackRange: 2.5
-  attackCooldown: 2
-  damageRadius: 2
-  normalAttackDamage: 20
-  canLeap: 1
-  leapRange: 7
-  leapForce: 9
-  leapCooldown: 3
-  effect: {fileID: 7165995853309248373}
-  leapVol: 0.3
-  splatVol: 0.4
-  leapDamageRadius: 2
-  leapDamage: 20
+  detectionRange: 10
+  lastAttackTime: -999
+  currentAIState: 0
+  player: {fileID: 0}
 --- !u!95 &2693187546379020044
 Animator:
   serializedVersion: 7
@@ -13061,20 +13055,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   knockbackForce: 1
   directionInfluence: 0.7
---- !u!114 &37117266046567200
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7569483539447259062}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ed1541a43c74ce1408d17c6c79fe13aa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  currentAnimation: 
-  queuedAnimation: 
 --- !u!114 &6999242623120960102
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13155,6 +13135,59 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   shaderEffectHandler: {fileID: 6999242623120960102}
+--- !u!114 &8594164270100327636
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7569483539447259062}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e6490fc093a0f4f4bad127df5edd69cd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &946910169626345073
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7569483539447259062}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 398ddd659d5193a4181389e2ea0761bc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &-6736712735464796415
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7569483539447259062}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b051143651728f74bb8f598fc818a009, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  patrolPoints: []
+  patrolSpeed: 0.8
+  reachThreshold: 0.3
+--- !u!114 &-8062204462726741376
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7569483539447259062}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fba49c3cd6381c14a8510bd18009aa7b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  chaseSpeed: 1.2
+  rotationSpeed: 8
 --- !u!1 &7818790826083011024
 GameObject:
   m_ObjectHideFlags: 0

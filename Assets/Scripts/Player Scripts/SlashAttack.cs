@@ -63,7 +63,7 @@ namespace CyberVeil.Player
                 }
 
                 //apply hit stop
-                HitstopManager.Instance.DoHitstop(0.03f, 0f); //adjust duration & freeze level
+                HitstopManager.Instance.DoHitstop(0.005f, 0f); //adjust duration & freeze level
 
                 // Deal damage
                 IDamagable damagable = other.GetComponent<IDamagable>();
