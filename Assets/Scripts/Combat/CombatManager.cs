@@ -50,6 +50,9 @@ namespace CyberVeil.Combat
                     if (targetHealth.faction != attackerFaction)
                     {
                         targetHealth.TakeDamage(damage);
+
+                        IKnockbackable knockbackTarget = hit.GetComponent<IKnockbackable>();
+                        knockbackTarget?.ApplyKnockback(attacker.transform);
                     }
                 }
             }

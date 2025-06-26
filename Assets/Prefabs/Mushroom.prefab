@@ -141,6 +141,8 @@ GameObject:
   - component: {fileID: 3316468625554108676}
   - component: {fileID: 6725774568482314579}
   - component: {fileID: 4442456149898717617}
+  - component: {fileID: 8939603339649093981}
+  - component: {fileID: 5000683795097272350}
   m_Layer: 0
   m_Name: Mushroom
   m_TagString: Enemy
@@ -363,6 +365,7 @@ MonoBehaviour:
   patrolPoints: []
   patrolSpeed: 1.4
   reachThreshold: 0.3
+  waiting: 0
 --- !u!114 &3316468625554108676
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -401,6 +404,36 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   chaseSpeed: 1.8
   rotationSpeed: 8
+--- !u!114 &8939603339649093981
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 426066099168787847}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3578d914d47a66e4f9863825179af65c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  attackRadius: 2
+  damageDelay: 1
+  damageAmount: 25
+--- !u!114 &5000683795097272350
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 426066099168787847}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2b3c06f2700eae4d8c7b1cadef07639, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  shieldTransform: {fileID: 8790287062741553504}
+  shieldAttackOffset: {x: 0, y: 0, z: 0.5}
+  shieldMoveDuration: 0.2
 --- !u!1 &546021040188208090
 GameObject:
   m_ObjectHideFlags: 0

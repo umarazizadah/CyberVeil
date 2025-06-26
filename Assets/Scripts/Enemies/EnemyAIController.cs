@@ -93,8 +93,11 @@ namespace CyberVeil.Enemies
         {
             characterStateMachine.ChangeState(CharacterState.Attacking);
 
-            // Wait for attack animation 
-            yield return new WaitForSeconds(1f); 
+            IEnemyAttack attack = GetComponent<IEnemyAttack>();
+            if (attack != null)
+            {
+                yield return StartCoroutine(attack.ExecuteAttack());
+            }
 
             ChangeAIState(EnemyAIState.Wait);
         }
