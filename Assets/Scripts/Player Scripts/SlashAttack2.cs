@@ -72,9 +72,6 @@ namespace CyberVeil.Player
                 IDamagable damagable = other.GetComponent<IDamagable>();
                 damagable?.TakeDamage(25);
 
-                IKnockbackable knockback = other.GetComponent<IKnockbackable>();
-                knockback?.ApplyKnockback(playerTransform);
-
             }
         }
 
