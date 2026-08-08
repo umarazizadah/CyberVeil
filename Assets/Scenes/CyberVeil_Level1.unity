@@ -112813,6 +112813,12 @@ MonoBehaviour:
     sounds: []
   - name: BATAMBIENT1
     sounds: []
+  - name: HOMEUISELECT
+    sounds: []
+  - name: HOMEUIENTER
+    sounds: []
+  - name: HOMEUISELECT2
+    sounds: []
 --- !u!82 &1313271822
 AudioSource:
   m_ObjectHideFlags: 0

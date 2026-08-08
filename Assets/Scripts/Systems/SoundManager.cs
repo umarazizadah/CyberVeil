@@ -47,6 +47,9 @@ namespace CyberVeil.Systems
         VEILSURGEACTIVE,
         BATPROJECTILEBLAST,
         BATAMBIENT1,
+        HOMEUISELECT,
+        HOMEUIENTER,
+        HOMEUISELECT2,
 
     }
 
