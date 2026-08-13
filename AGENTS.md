@@ -32,6 +32,30 @@ The enabled build flow in `ProjectSettings/EditorBuildSettings.asset` is:
 - Do not use scene backups, typo-named scenes, screenshots, or approval captures as runtime sources without explicit confirmation.
 - When changing scene flow, verify both the build settings and string-based scene references in scripts.
 
+## Architecture principles
+
+CyberVeil is a solo-developed Unity action game with a neon-medieval aesthetic. It emphasizes responsive combat, reusable enemy behavior, wave-based encounters, upgrades, and visually distinct arenas.
+
+The project favors modular, event-driven systems, but abstractions should solve a real reuse or coupling problem rather than add complexity.
+
+When modifying the project:
+
+- Preserve existing gameplay behavior unless the task intentionally changes it.
+- Reuse established systems and interfaces before creating parallel implementations.
+- Keep components focused and avoid broad rewrites.
+- Keep Inspector configuration organized, understandable, and free of unnecessary references.
+- Avoid turning modular components into large manager classes without a clear architectural reason.
+- Avoid new cross-system dependencies when an existing contract or event can communicate the same information.
+
+Choose communication mechanisms intentionally:
+
+- Use interfaces for shared behavioral contracts.
+- Use C# events for one-to-many notifications and loosely coupled reactions.
+- Pair event subscriptions with reliable unsubscription in the appropriate Unity lifecycle method.
+- Use serialized references for explicit, required scene or prefab relationships.
+- Use ScriptableObjects for reusable configuration and data shared across instances.
+- Prefer a simple local reference when additional abstraction would provide no practical benefit.
+
 ## Repository organization
 
 - `Assets/Art/`: models, animations, materials, shaders, textures, and UI art.
