@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -14,6 +15,12 @@ namespace CyberVeil.Player
     /// </summary>
     public class PlayerAttack : MonoBehaviour
     {
+        /// <summary>
+        /// Raised only when the attack gate rejects an otherwise requested slash.
+        /// UI feedback can subscribe without polling combat input.
+        /// </summary>
+        public event Action OnAttackRejected;
+
         [Header("Attack Settings")]
         public bool canAttack = true; // Flag to prevent spam attacking
         [SerializeField] private float attackMovementBoost = 30f; // Boost forward whenever attacking
@@ -103,7 +110,7 @@ namespace CyberVeil.Player
             }
             else if (attackGate != null && !attackGate.CanStartAttack)
             {
-                SoundManager.PlaySound(SoundType.ATTACKLOCK, 0.6f); 
+                RejectAttack();
                 return; 
             }
 
@@ -129,7 +136,7 @@ namespace CyberVeil.Player
             }
             else if (attackGate != null && !attackGate.CanStartAttack)
             {
-                SoundManager.PlaySound(SoundType.ATTACKLOCK, 0.6f);
+                RejectAttack();
                 return;
             }
 
@@ -148,7 +155,7 @@ namespace CyberVeil.Player
             }
             else if (attackGate != null && !attackGate.CanStartAttack)
             {
-                SoundManager.PlaySound(SoundType.ATTACKLOCK, 0.6f);
+                RejectAttack();
                 return;
             }
 
@@ -358,6 +365,12 @@ namespace CyberVeil.Player
         private void ResetHeavyAttackCooldown()
         {
             canHeavyAttack = true;
+        }
+
+        private void RejectAttack()
+        {
+            SoundManager.PlaySound(SoundType.ATTACKLOCK, 0.6f);
+            OnAttackRejected?.Invoke();
         }
     }
 }

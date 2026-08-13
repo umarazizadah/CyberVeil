@@ -1,7 +1,15 @@
+using System;
 using CyberVeil.Core;
 using UnityEngine;
 namespace CyberVeil.Player
 {
+    public enum AttackChargeChangeReason
+    {
+        Spent,
+        Reset,
+        LimitChanged
+    }
+
     /// <summary>
     /// Enforces a cap on consecutive player attacks until a dash occurs (kind of like a stamina mechanic but with a twist)
     /// Implements <see cref="IAttackGate"/> so the combat system can query whether
@@ -10,7 +18,7 @@ namespace CyberVeil.Player
     /// </summary>
     public class AttackLimiterMechanic : MonoBehaviour, IAttackGate
     {
-        [SerializeField] private int limit = 5; // Max nunmber of consecutive attacks before lock
+        [SerializeField] private int limit = 4; // Max number of consecutive attacks before lock
 
         private int defaultLimit;
 
@@ -21,7 +29,14 @@ namespace CyberVeil.Player
         public bool CanStartAttack => count < limit;
         public int CurrentCount => count;
         public int Limit => limit;
+        public int RemainingCharges => Mathf.Max(0, limit - count);
         public bool IsLocked => count >= limit;
+
+        /// <summary>
+        /// Raised whenever the authoritative slash-charge state changes. The arguments are
+        /// remaining charges, maximum charges, and the reason for the change.
+        /// </summary>
+        public event Action<int, int, AttackChargeChangeReason> OnChargesChanged;
 
         private void Awake()
         {
@@ -56,6 +71,7 @@ namespace CyberVeil.Player
             if (count < limit)
             {
                 count++;
+                NotifyChargesChanged(AttackChargeChangeReason.Spent);
             }
         }
         
@@ -64,6 +80,7 @@ namespace CyberVeil.Player
         public void ResetGate()
         {
             count = 0; // Unlocks attacks again
+            NotifyChargesChanged(AttackChargeChangeReason.Reset);
         }
 
         /// <summary>
@@ -72,7 +89,8 @@ namespace CyberVeil.Player
         public void SetLimit(int newLimit)
         {
             limit = Mathf.Max(1, newLimit);
-            ResetGate();
+            count = 0;
+            NotifyChargesChanged(AttackChargeChangeReason.LimitChanged);
         }
 
         /// <summary>
@@ -81,7 +99,13 @@ namespace CyberVeil.Player
         public void ResetLimit()
         {
             limit = Mathf.Max(1, defaultLimit);
-            ResetGate();
+            count = 0;
+            NotifyChargesChanged(AttackChargeChangeReason.LimitChanged);
+        }
+
+        private void NotifyChargesChanged(AttackChargeChangeReason reason)
+        {
+            OnChargesChanged?.Invoke(RemainingCharges, limit, reason);
         }
     }
 
