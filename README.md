@@ -81,7 +81,7 @@ The home screen supports the mouse, arrow keys or `W`/`S`, `Enter` to confirm, a
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/umarazizadah/CyberVeil.git
+   git clone https://github.com/Umar-Azizadah/CyberVeil.git
    ```
 
 2. Add the cloned folder as a project in Unity Hub.
@@ -106,6 +106,13 @@ The enabled build sequence is:
 - Coroutine-driven attacks, VFX, cinematics, UI animation, and scene transitions
 - Unity Input System alongside focused legacy-input integrations
 - Universal Render Pipeline, Shader Graph, Visual Effect Graph, and AI Navigation
+
+## Documentation
+
+- [Performance optimization case study](docs/PERFORMANCE_CASE_STUDY.md)
+- [Architecture overview](docs/ARCHITECTURE.md)
+- [Build and testing guide](docs/BUILD_AND_TESTING.md)
+- [Third-party software and asset notices](THIRD_PARTY_NOTICES.md)
 
 ## Project Status
 
