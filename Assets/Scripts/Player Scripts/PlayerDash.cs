@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System.Collections;
@@ -35,8 +36,17 @@ namespace CyberVeil.Player
         private bool isDashing = false;
         private bool canDash = true;
         private float originalFOV;
+        private int lastProcessedDashInputFrame = -1;
 
         public bool IsDashing => isDashing;
+        public bool CanDash => canDash;
+        public float CooldownProgress { get; private set; } = 1f;
+        public Vector3 LastDashDirection { get; private set; } = Vector3.forward;
+
+        public event Action<Vector3> OnDashStarted;
+        public event Action<float> OnCooldownProgressChanged;
+        public event Action OnDashReady;
+        public event Action OnDashRejected;
 
         private void Start()
         {
@@ -58,19 +68,40 @@ namespace CyberVeil.Player
             if (CinematicCamera.Instance != null && CinematicCamera.Instance.IsActive)
                 return;
 
-            if (Keyboard.current?.spaceKey.wasPressedThisFrame == true && canDash && !isDashing && playerState.CurrentState != CharacterState.Attacking)
+            if (Keyboard.current?.spaceKey.wasPressedThisFrame != true)
+                return;
+
+            // PlayerController also forwards dash input to this component. Latch the press so
+            // one accepted blink cannot be mistaken for a rejected second request in the same frame.
+            if (lastProcessedDashInputFrame == Time.frameCount)
+                return;
+            lastProcessedDashInputFrame = Time.frameCount;
+
+            if (!canDash || isDashing || playerState == null || playerState.CurrentState == CharacterState.Attacking)
             {
-                StartCoroutine(PerformDash());
+                OnDashRejected?.Invoke();
+                return;
             }
+
+            StartCoroutine(PerformDash());
         }
 
         private IEnumerator PerformDash()
         {
+            Vector3 dashDirection = transform.forward;
+            if (dashDirection.sqrMagnitude > 0.0001f)
+                dashDirection.Normalize();
+            else
+                dashDirection = Vector3.forward;
+
             playerState.ChangeState(CharacterState.Dashing);
 
             // Locks out further dashing
             isDashing = true;
             canDash = false;
+            LastDashDirection = dashDirection;
+            SetCooldownProgress(0f);
+            OnDashStarted?.Invoke(LastDashDirection);
             SoundManager.PlaySound(SoundType.DASH, dashVol);
 
             // Visuals 
@@ -80,7 +111,6 @@ namespace CyberVeil.Player
 
             // Movement loop
             float timer = 0f;
-            Vector3 dashDirection = transform.forward;
             while (timer < dashDuration)
             {
                 var mods = CyberVeil.Player.PlayerStatsUpgradeManager.Instance;
@@ -103,8 +133,28 @@ namespace CyberVeil.Player
 
         private IEnumerator DashCooldown()
         {
-            yield return new WaitForSeconds(dashCooldown);
+            float duration = Mathf.Max(0f, dashCooldown);
+            if (duration > 0f)
+            {
+                float elapsed = 0f;
+                while (elapsed < duration)
+                {
+                    yield return null;
+                    elapsed += Time.deltaTime;
+                    if (elapsed < duration)
+                        SetCooldownProgress(elapsed / duration);
+                }
+            }
+
             canDash = true;
+            SetCooldownProgress(1f);
+            OnDashReady?.Invoke();
+        }
+
+        private void SetCooldownProgress(float progress)
+        {
+            CooldownProgress = Mathf.Clamp01(progress);
+            OnCooldownProgressChanged?.Invoke(CooldownProgress);
         }
 
         private void UpdateFOV()
