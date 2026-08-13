@@ -28,7 +28,18 @@ namespace CyberVeil.Enemies
         {
             player = PlayerReference.PlayerTransform;
             lastUsedTimestamps = new float[attacks.Count];
-            for (int i = 0; i < attacks.Count; i++) lastUsedTimestamps[i] = -Mathf.Infinity; // Ensures all attacks are initially ready
+            for (int i = 0; i < attacks.Count; i++)
+            {
+                lastUsedTimestamps[i] = -Mathf.Infinity; // Ensures all attacks are initially ready
+
+                EnemyAttackData attack = attacks[i];
+                if (attack == null || attack.attackPrefab == null)
+                    continue;
+
+                EnemyProjectileAttack projectileAttack = attack.attackPrefab.GetComponent<EnemyProjectileAttack>();
+                if (projectileAttack != null)
+                    projectileAttack.PrewarmProjectiles();
+            }
         }
 
         /// <summary>

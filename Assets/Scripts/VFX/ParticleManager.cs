@@ -98,6 +98,8 @@ namespace CyberVeil.VFX
             ParticleSystem ps = GetFromPool(type);
             ps.transform.SetPositionAndRotation(position, rotation);    
             ps.gameObject.SetActive(true);
+            ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            ps.Clear(true);
             ps.Play();
 
             // Return the effect to the pool after it finishes playing
@@ -127,7 +129,8 @@ namespace CyberVeil.VFX
         private System.Collections.IEnumerator ReturnToPoolAfterDelay(VFXType type, ParticleSystem ps, float delay)
         {
             yield return new WaitForSeconds(delay);
-            ps.Stop();
+            ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            ps.Clear(true);
             ps.gameObject.SetActive(false);
             vfxPools[type].Enqueue(ps);
         }

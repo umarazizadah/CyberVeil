@@ -39,6 +39,11 @@ namespace CyberVeil.Enemies
 
         private Transform player;
 
+        public void PrewarmProjectiles()
+        {
+            RuntimeObjectPool.Prewarm(projectilePrefab, 4);
+        }
+
         public IEnumerator ExecuteAttack()
         {
             if (player == null)
@@ -69,7 +74,10 @@ namespace CyberVeil.Enemies
             if (muzzle == null)
                 spawnPos += dir * Mathf.Max(0f, spawnForwardOffset);
 
-            EnemyProjectile proj = Instantiate(projectilePrefab, spawnPos, Quaternion.LookRotation(dir, Vector3.up));
+            EnemyProjectile proj = RuntimeObjectPool.Get(
+                projectilePrefab,
+                spawnPos,
+                Quaternion.LookRotation(dir, Vector3.up));
             proj.Init(dir, damage, hitRadius, projectileSpeed, projectileLifetime, transform.root.gameObject);
         }
 

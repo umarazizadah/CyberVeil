@@ -1,5 +1,6 @@
 using UnityEngine;
 using CyberVeil.Combat;
+using CyberVeil.Systems;
 
 namespace CyberVeil.Enemies
 {
@@ -8,7 +9,7 @@ namespace CyberVeil.Enemies
     /// Spawned by EnemyProjectileAttack and moves in a straight line from spawn point.
     /// Applies damage in a radius on impact or after lifetime expires.
     /// </summary>
-    public class EnemyProjectile : MonoBehaviour
+    public class EnemyProjectile : MonoBehaviour, IPooledObject
     {
         private Vector3 moveDirection;
         private float speed;
@@ -41,6 +42,7 @@ namespace CyberVeil.Enemies
             }
             sphereCollider.radius = hitRadius;
             sphereCollider.isTrigger = true;
+            sphereCollider.enabled = true;
 
             // Setup rigidbody for physics (kinematic, we control movement)
             rb = GetComponent<Rigidbody>();
@@ -96,8 +98,33 @@ namespace CyberVeil.Enemies
             // Optional: Spawn impact VFX here if needed
             // ParticleManager.Instance.PlayEffect("ProjectileImpact", transform.position, Quaternion.identity);
 
-            // Destroy the projectile
-            Destroy(gameObject);
+            if (!RuntimeObjectPool.Release(gameObject))
+                Destroy(gameObject);
+        }
+
+        public void OnTakenFromPool()
+        {
+        }
+
+        public void OnReturnedToPool()
+        {
+            moveDirection = Vector3.zero;
+            speed = 0f;
+            lifetime = 0f;
+            elapsedTime = 0f;
+            hitRadius = 0f;
+            damage = 0;
+            owner = null;
+            hasDetonated = true;
+
+            if (sphereCollider != null)
+                sphereCollider.enabled = false;
+
+            if (rb != null && !rb.isKinematic)
+            {
+                rb.linearVelocity = Vector3.zero;
+                rb.angularVelocity = Vector3.zero;
+            }
         }
     }
 }
