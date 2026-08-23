@@ -183839,6 +183839,10 @@ PrefabInstance:
       value: 0.4
       objectReference: {fileID: 0}
     - target: {fileID: 301604811418425727, guid: cd96ca02b82ab534ba82c51722619aa3, type: 3}
+      propertyPath: attackDuration
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 301604811418425727, guid: cd96ca02b82ab534ba82c51722619aa3, type: 3}
       propertyPath: attackGateBehaviour
       value: 
       objectReference: {fileID: 928571277}
