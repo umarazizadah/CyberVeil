@@ -112852,7 +112852,7 @@ AudioSource:
   m_audioClip: {fileID: 8300000, guid: dabab714de041a442a3eaceae27d56ad, type: 3}
   m_Resource: {fileID: 8300000, guid: dabab714de041a442a3eaceae27d56ad, type: 3}
   m_PlayOnAwake: 1
-  m_Volume: 0.177
+  m_Volume: 0.204
   m_Pitch: 1
   Loop: 1
   Mute: 0
