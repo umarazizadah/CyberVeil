@@ -662,6 +662,7 @@ namespace CyberVeil.UI
             switch (index)
             {
                 case 0:
+                    VeilRunManager.ResetForNewRun();
                     SoundManager.PlaySound(SoundType.HOMEUIENTER, 0.3f);
                     SoundManager.PlaySound(SoundType.TRIALEND, 0.4f);
                     StartCoroutine(CollapseArchiveAndLoad());

@@ -128,8 +128,8 @@ namespace CyberVeil.Combat
             if (faction != Faction.Player) return maxHealth;
 
             var mods = PlayerStatsUpgradeManager.Instance;
-            float pct = mods ? mods.MaxHealthPct : 0f;   // e.g., 0.20f = +20%
-            return Mathf.Max(1, Mathf.RoundToInt(maxHealth * (1f + pct)));
+            float multiplier = mods ? mods.MaxHealthMultiplier : 1f;
+            return Mathf.Max(1, Mathf.RoundToInt(maxHealth * multiplier));
         }
 
 

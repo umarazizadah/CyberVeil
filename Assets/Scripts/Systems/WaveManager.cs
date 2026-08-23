@@ -6,6 +6,7 @@ using UnityEngine.Serialization;
 using CyberVeil.Enemies;
 using CyberVeil.Systems;
 using CyberVeil.UI;
+using CyberVeil.World;
 
 namespace CyberVeil.Systems
 {
@@ -59,6 +60,13 @@ namespace CyberVeil.Systems
             public SpawnGroup[] spawnGroups;
         }
 
+        [System.Serializable]
+        public class VeilShardReward
+        {
+            [Min(0)] public int waveIndex;
+            public VeilUpgradePair upgradePair;
+        }
+
         [Header("Waves")]
         [FormerlySerializedAs("trial1")]
         public Wave[] waves = new Wave[3];
@@ -71,6 +79,14 @@ namespace CyberVeil.Systems
         [Header("Group Rewards")]
         [SerializeField] private GameObject healingCrystalPrefab;
 
+        [Header("Veil Shard Rewards")]
+        [SerializeField] private GameObject veilShardUpgradePrefab;
+        [SerializeField] private Transform veilShardSpawnPoint;
+        [Tooltip("Each reward assigns a data-authored upgrade pair to a zero-based wave index.")]
+        [SerializeField] private VeilShardReward[] veilShardRewards = Array.Empty<VeilShardReward>();
+        [SerializeField, Min(0f)] private float shardSettleSeconds = 0.75f;
+        [SerializeField, Range(0, 31)] private int interactableLayer = 3;
+
         [Header("Flow")]
         public bool autoStartOnPlay = false;
 
@@ -78,6 +94,9 @@ namespace CyberVeil.Systems
         private int waveIndex = 0;
         private bool waveInProgress = false;
         private bool waitingForUpgrade = false;
+        private bool waitingForShardChoice;
+        private VeilShardInteractable activeVeilShard;
+        private readonly HashSet<int> resolvedShardWaveIndices = new HashSet<int>();
 
         private int aliveEnemies = 0; // Tracks actual alive enemies for the current user
 
@@ -119,8 +138,13 @@ namespace CyberVeil.Systems
 
         public void StartRun()
         {
+            if (waveInProgress || waitingForShardChoice || waitingForUpgrade)
+                return;
+
             waveIndex = 0;
             waitingForUpgrade = false;
+            waitingForShardChoice = false;
+            resolvedShardWaveIndices.Clear();
 
             if (!waveInProgress) StartCoroutine(RunCurrentWave());
         }
@@ -131,7 +155,7 @@ namespace CyberVeil.Systems
         /// </summary>
         public void ContinueAfterUpgrade()
         {
-            if (!waitingForUpgrade) return;
+            if (!AreAllWavesComplete()) return;
 
             waitingForUpgrade = false;
 
@@ -187,6 +211,9 @@ namespace CyberVeil.Systems
             // Wave cleared
             OnWaveCleared?.Invoke(0, waveIndex);
 
+            if (ShouldSpawnShardReward(waveIndex))
+                yield return StartCoroutine(SpawnAndWaitForShardChoice(waveIndex));
+
             // Decide what happens next
             bool isFinalWave = (waveIndex >= waves.Length - 1);
 
@@ -211,6 +238,95 @@ namespace CyberVeil.Systems
 
                 StartCoroutine(RunCurrentWave());
             }
+        }
+
+        private bool ShouldSpawnShardReward(int clearedWaveIndex)
+        {
+            if (resolvedShardWaveIndices.Contains(clearedWaveIndex))
+                return false;
+
+            VeilShardReward reward = GetShardReward(clearedWaveIndex);
+            if (reward == null || reward.upgradePair == null)
+                return false;
+
+            return VeilRunManager.Instance == null || VeilRunManager.Instance.CanSelect(reward.upgradePair);
+        }
+
+        private IEnumerator SpawnAndWaitForShardChoice(int clearedWaveIndex)
+        {
+            waitingForShardChoice = true;
+
+            VeilShardReward reward = GetShardReward(clearedWaveIndex);
+
+            if (veilShardUpgradePrefab == null || veilShardSpawnPoint == null || reward?.upgradePair == null)
+            {
+                Debug.LogError("Required Veil shard reward is missing its prefab, spawn point, or upgrade pair.", this);
+                resolvedShardWaveIndices.Add(clearedWaveIndex);
+                waitingForShardChoice = false;
+                yield break;
+            }
+
+            GameObject instance = Instantiate(
+                veilShardUpgradePrefab,
+                veilShardSpawnPoint.position,
+                veilShardSpawnPoint.rotation);
+            activeVeilShard = instance.GetComponent<VeilShardInteractable>();
+            if (activeVeilShard == null)
+                activeVeilShard = instance.AddComponent<VeilShardInteractable>();
+            activeVeilShard.Initialize(
+                this,
+                clearedWaveIndex,
+                reward.upgradePair,
+                shardSettleSeconds,
+                interactableLayer);
+
+            yield return new WaitUntil(() => !waitingForShardChoice);
+        }
+
+        public void NotifyVeilShardChoiceResolved(int clearedWaveIndex, VeilShardInteractable shard)
+        {
+            if (!waitingForShardChoice || shard == null || shard != activeVeilShard)
+                return;
+
+            resolvedShardWaveIndices.Add(clearedWaveIndex);
+            activeVeilShard = null;
+            waitingForShardChoice = false;
+        }
+
+        private bool HaveAllRequiredShardChoicesResolved()
+        {
+            if (veilShardRewards == null || veilShardRewards.Length == 0)
+                return true;
+
+            for (int i = 0; i < veilShardRewards.Length; i++)
+            {
+                VeilShardReward reward = veilShardRewards[i];
+                if (reward == null || reward.upgradePair == null)
+                    continue;
+                if (resolvedShardWaveIndices.Contains(reward.waveIndex))
+                    continue;
+                if (!reward.upgradePair.Repeatable && VeilRunManager.Instance != null &&
+                    VeilRunManager.Instance.HasSelected(reward.upgradePair.StableId))
+                    continue;
+
+                if (reward.waveIndex >= 0)
+                    return false;
+            }
+            return true;
+        }
+
+        private VeilShardReward GetShardReward(int clearedWaveIndex)
+        {
+            if (veilShardRewards == null)
+                return null;
+
+            for (int i = 0; i < veilShardRewards.Length; i++)
+            {
+                VeilShardReward reward = veilShardRewards[i];
+                if (reward != null && reward.waveIndex == clearedWaveIndex)
+                    return reward;
+            }
+            return null;
         }
 
         private void ApplyWaveModifier(Wave wave)
@@ -464,7 +580,9 @@ namespace CyberVeil.Systems
 
         public bool IsWaveInProgress() => waveInProgress;
         public bool IsWaitingForUpgrade() => waitingForUpgrade;
-        public bool AreAllWavesComplete() => waitingForUpgrade && waveIndex >= waves.Length - 1;
+        public bool IsWaitingForShardChoice() => waitingForShardChoice;
+        public bool AreAllWavesComplete() => waitingForUpgrade && !waitingForShardChoice &&
+                                             waveIndex >= waves.Length - 1 && HaveAllRequiredShardChoicesResolved();
 
         // Called by reporter when an enemy is destroyed/dies
         public void NotifyEnemyDestroyed(Vector3 position, int groupId, int enemyWaveIndex)

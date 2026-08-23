@@ -27,6 +27,8 @@ namespace CyberVeil.Enemies
         private void Awake()
         {
             player = PlayerReference.PlayerTransform;
+            if (attacks == null)
+                attacks = new List<EnemyAttackData>();
             lastUsedTimestamps = new float[attacks.Count];
             for (int i = 0; i < attacks.Count; i++)
             {
@@ -48,11 +50,18 @@ namespace CyberVeil.Enemies
         /// </summary>
         public bool HasAttackReady()
         {
+            if (player == null || attacks == null)
+                return false;
+
             float distSqr = (transform.position - player.position).sqrMagnitude;
             for (int i = 0; i < attacks.Count; i++)
             {
+                if (attacks[i] == null)
+                    continue;
+
                 float rangeSqr = attacks[i].attackRange * attacks[i].attackRange;
-                if (Time.time >= lastUsedTimestamps[i] + attacks[i].cooldown &&
+                float effectiveCooldown = attacks[i].cooldown * VeilRunManager.CurrentEnemyAttackRecoveryMultiplier;
+                if (Time.time >= lastUsedTimestamps[i] + effectiveCooldown &&
                     distSqr <= rangeSqr)
                 {
                     selectedAttack = attacks[i];

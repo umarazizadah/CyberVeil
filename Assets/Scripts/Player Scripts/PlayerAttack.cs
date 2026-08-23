@@ -193,8 +193,9 @@ namespace CyberVeil.Player
             // Damage
             var mods = PlayerStatsUpgradeManager.Instance;
             float dmgMul = mods ? mods.DamageMultiplier : 1f;
+            float heavyUpgradeMul = mods ? mods.HeavyDamageMultiplier : VeilRunManager.CurrentHeavyDamageMultiplier;
             float range = heavyAttackRange > 0f ? heavyAttackRange : attackRange;
-            int finalDamage = Mathf.RoundToInt(attackDamage * heavyDamageMultiplier * dmgMul);
+            int finalDamage = Mathf.RoundToInt(attackDamage * heavyDamageMultiplier * dmgMul * heavyUpgradeMul);
             CombatManager.Instance.DealDamageInRadius(transform.position, range, finalDamage, gameObject);
 
             Vector3 attackDirection = playerController.GetLastDirection();

@@ -34,7 +34,7 @@ namespace CyberVeil.World
             var prompt = FindObjectOfType<InteractPromptUI>(true);
             if (prompt == null) return;
 
-            prompt.Show("Cleanse at the portal");
+            prompt.Show("Enter the portal");
 
             // Cancel any existing hide coroutine and start a new one
             if (hideCoroutine != null) StopCoroutine(hideCoroutine);

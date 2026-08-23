@@ -143,9 +143,8 @@ namespace CyberVeil.Player
             if (inputMag > 1f) inputDir.Normalize();
 
             // Determine target walk speed (includes upgrades, exactly like before)
-            float walkSpeed = defaultSpeed;
             var mods = PlayerStatsUpgradeManager.Instance;
-            if (mods) walkSpeed += mods.MoveSpeedAdd;
+            float walkSpeed = mods ? mods.GetMoveSpeed(defaultSpeed) : defaultSpeed;
 
             // Determine if currently sprinting according to state machine (same logic as before)
             bool isSprintingState = (playerSprint != null && stateMachine != null && stateMachine.CurrentState == CharacterState.Sprinting);
