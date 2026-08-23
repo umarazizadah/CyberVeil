@@ -115866,7 +115866,8 @@ MonoBehaviour:
   target: {fileID: 40095864}
   smoothTime: 0.3
   offset: {x: 0, y: 4, z: -4.2}
-  rotationSpeed: 5
+  smoothingSharpness: 24
+  maximumMouseDelta: 500
   minYAngle: -40
   maxYAngle: -25
 --- !u!1 &1145978218
