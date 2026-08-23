@@ -40693,7 +40693,7 @@ MonoBehaviour:
   - name: Wave1
     enemyPrefabs: []
     enemyCount: 5
-    spawnRate: 6
+    spawnRate: 3
     clearMode: 0
     surviveSeconds: 30
     forcedCurse: 0
@@ -40703,7 +40703,7 @@ MonoBehaviour:
       - {fileID: 7636592267669719379, guid: 460ed5d0e7a41124d862ea29d6862aa0, type: 3}
       - {fileID: 6312980647891792800, guid: 9a3bde1204d2d9947badad425205c1c8, type: 3}
       enemyCount: 7
-      spawnRate: 6
+      spawnRate: 3
       pattern: 0
       burstSize: 0
       ambushDelay: 0
@@ -40715,7 +40715,7 @@ MonoBehaviour:
       - {fileID: 7636592267669719379, guid: 460ed5d0e7a41124d862ea29d6862aa0, type: 3}
       - {fileID: 1402040189640746649, guid: 488f9b0b96ed80941b04e9d412ff108c, type: 3}
       enemyCount: 3
-      spawnRate: 5.5
+      spawnRate: 3
       pattern: 1
       burstSize: 0
       ambushDelay: 0
