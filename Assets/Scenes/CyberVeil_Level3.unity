@@ -183887,8 +183887,28 @@ PrefabInstance:
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 4726883477066510990, guid: cd96ca02b82ab534ba82c51722619aa3, type: 3}
+      propertyPath: turnSpeed
+      value: 700
+      objectReference: {fileID: 0}
+    - target: {fileID: 4726883477066510990, guid: cd96ca02b82ab534ba82c51722619aa3, type: 3}
       propertyPath: jumpHeight
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4726883477066510990, guid: cd96ca02b82ab534ba82c51722619aa3, type: 3}
+      propertyPath: defaultSpeed
+      value: 3.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4726883477066510990, guid: cd96ca02b82ab534ba82c51722619aa3, type: 3}
+      propertyPath: sharpTurnSpeed
+      value: 950
+      objectReference: {fileID: 0}
+    - target: {fileID: 4726883477066510990, guid: cd96ca02b82ab534ba82c51722619aa3, type: 3}
+      propertyPath: accelerationTime
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4726883477066510990, guid: cd96ca02b82ab534ba82c51722619aa3, type: 3}
+      propertyPath: decelerationTime
+      value: 0.07
       objectReference: {fileID: 0}
     - target: {fileID: 5939928949914901361, guid: cd96ca02b82ab534ba82c51722619aa3, type: 3}
       propertyPath: m_LocalScale.x
@@ -183946,6 +183966,54 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: cf0ff68832b83844092b975d9dba2aa1, type: 2}
+    - target: {fileID: 7205059177896877071, guid: cd96ca02b82ab534ba82c51722619aa3, type: 3}
+      propertyPath: poseRecovery
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 7205059177896877071, guid: cd96ca02b82ab534ba82c51722619aa3, type: 3}
+      propertyPath: poseResponse
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 7205059177896877071, guid: cd96ca02b82ab534ba82c51722619aa3, type: 3}
+      propertyPath: turnBankDegrees
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 7205059177896877071, guid: cd96ca02b82ab534ba82c51722619aa3, type: 3}
+      propertyPath: brakeLeanDegrees
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7205059177896877071, guid: cd96ca02b82ab534ba82c51722619aa3, type: 3}
+      propertyPath: startLeanDegrees
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 7205059177896877071, guid: cd96ca02b82ab534ba82c51722619aa3, type: 3}
+      propertyPath: turnTwistDegrees
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7205059177896877071, guid: cd96ca02b82ab534ba82c51722619aa3, type: 3}
+      propertyPath: turnAnimationHold
+      value: 0.21
+      objectReference: {fileID: 0}
+    - target: {fileID: 7205059177896877071, guid: cd96ca02b82ab534ba82c51722619aa3, type: 3}
+      propertyPath: brakeAnimationHold
+      value: 0.24
+      objectReference: {fileID: 0}
+    - target: {fileID: 7205059177896877071, guid: cd96ca02b82ab534ba82c51722619aa3, type: 3}
+      propertyPath: startAnimationHold
+      value: 0.22
+      objectReference: {fileID: 0}
+    - target: {fileID: 7205059177896877071, guid: cd96ca02b82ab534ba82c51722619aa3, type: 3}
+      propertyPath: turnRetriggerDelay
+      value: 0.28
+      objectReference: {fileID: 0}
+    - target: {fileID: 7205059177896877071, guid: cd96ca02b82ab534ba82c51722619aa3, type: 3}
+      propertyPath: locomotionCrossFade
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7205059177896877071, guid: cd96ca02b82ab534ba82c51722619aa3, type: 3}
+      propertyPath: turnAnimationThreshold
+      value: 38
+      objectReference: {fileID: 0}
     - target: {fileID: 8792134517257224937, guid: cd96ca02b82ab534ba82c51722619aa3, type: 3}
       propertyPath: toggleAxe1
       value: 

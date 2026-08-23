@@ -6978,17 +6978,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7d7ab2ea51539974bbc5c9ba5137c1b6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  defaultSpeed: 2.8
+  defaultSpeed: 3.6
   speed: 0
   canMove: 1
   moveDirection: {x: 0, y: 0, z: 0}
   lastDirection: {x: 0, y: 0, z: 1}
-  acceleration: 12
-  deceleration: 14
-  baseTurnSpeed: 16
-  boostedTurnSpeed: 28
-  turnBoostDotThreshold: 0.2
-  sprintSpeed: 3.5
+  inputDeadZone: 0.12
+  accelerationTime: 0.07
+  decelerationTime: 0.05
+  startSpeedFraction: 0.32
+  movingStateSpeedThreshold: 0.08
+  turnSpeed: 1080
+  sharpTurnSpeed: 1800
+  sharpTurnDotThreshold: 0.25
+  sprintSpeed: 4.5
   sprintRampUp: 10
   sprintRampDown: 14
   gravity: -20
