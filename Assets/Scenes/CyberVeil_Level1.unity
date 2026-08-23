@@ -165464,9 +165464,25 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7675892104436448897, guid: 6ada395394e2c31478493a8cbd362e88, type: 3}
+      propertyPath: m_Color.b
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7675892104436448897, guid: 6ada395394e2c31478493a8cbd362e88, type: 3}
+      propertyPath: m_Color.g
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7675892104436448897, guid: 6ada395394e2c31478493a8cbd362e88, type: 3}
+      propertyPath: m_Color.r
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8781206953553351647, guid: 6ada395394e2c31478493a8cbd362e88, type: 3}
       propertyPath: m_Name
       value: VeilCorruptionMeter
+      objectReference: {fileID: 0}
+    - target: {fileID: 8781206953553351647, guid: 6ada395394e2c31478493a8cbd362e88, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
