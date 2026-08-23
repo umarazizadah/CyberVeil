@@ -115,9 +115,9 @@ namespace CyberVeil.Player
             {
                 var mods = CyberVeil.Player.PlayerStatsUpgradeManager.Instance;
 
-                // Query the upgrade manager singleton for a flat distance bonus and adds to base
-                float extraPerSecond = (mods ? mods.DashDistanceAdd : 0f) / dashDuration;
-                float effectiveSpeed = dashSpeed + extraPerSecond;
+                float baseDistance = dashSpeed * dashDuration;
+                float effectiveDistance = mods ? mods.GetDashDistance(baseDistance) : baseDistance;
+                float effectiveSpeed = dashDuration > 0f ? effectiveDistance / dashDuration : dashSpeed;
 
                 controller.Move(dashDirection * effectiveSpeed * Time.deltaTime);
                 timer += Time.deltaTime;

@@ -40,9 +40,16 @@ namespace CyberVeil.UI
         public CanvasGroup settingsGroup;
         public Button volumeDownButton;
         public Button volumeUpButton;
+        public Button sensitivityDownButton;
+        public Button sensitivityUpButton;
+        public Button invertYButton;
+        public Button mouseSmoothingButton;
         public Button fullscreenButton;
         public Button settingsBackButton;
         public TMP_Text volumeValueLabel;
+        public TMP_Text sensitivityValueLabel;
+        public TMP_Text invertYValueLabel;
+        public TMP_Text mouseSmoothingValueLabel;
         public TMP_Text fullscreenValueLabel;
         public RectTransform settingsSelector;
         public RectTransform[] settingsRows;
@@ -98,6 +105,7 @@ namespace CyberVeil.UI
             Cursor.visible = true;
             Cursor.lockState = CursorLockMode.None;
 
+            EnsureSettingsRows();
             BindPrimaryMenu();
             BindSettingsMenu();
 
@@ -243,8 +251,46 @@ namespace CyberVeil.UI
         {
             ConfigureSettingsButton(volumeDownButton, 0, DecreaseVolume);
             ConfigureSettingsButton(volumeUpButton, 0, IncreaseVolume);
-            ConfigureSettingsButton(fullscreenButton, 1, ToggleFullscreen);
-            ConfigureSettingsButton(settingsBackButton, 2, CloseSettings);
+            ConfigureSettingsButton(sensitivityDownButton, 1, DecreaseMouseSensitivity);
+            ConfigureSettingsButton(sensitivityUpButton, 1, IncreaseMouseSensitivity);
+            ConfigureSettingsButton(invertYButton, 2, ToggleInvertY);
+            ConfigureSettingsButton(mouseSmoothingButton, 3, ToggleMouseSmoothing);
+            ConfigureSettingsButton(fullscreenButton, 4, ToggleFullscreen);
+            ConfigureSettingsButton(settingsBackButton, 5, CloseSettings);
+        }
+
+        private void EnsureSettingsRows()
+        {
+            if (settingsRows != null
+                && settingsRows.Length == 6
+                && System.Array.TrueForAll(settingsRows, row => row != null))
+            {
+                return;
+            }
+
+            settingsRows = new[]
+            {
+                GetButtonRow(volumeUpButton),
+                GetButtonRow(sensitivityUpButton),
+                GetButtonRow(invertYButton),
+                GetButtonRow(mouseSmoothingButton),
+                GetButtonRow(fullscreenButton),
+                GetButtonRow(settingsBackButton)
+            };
+        }
+
+        private static RectTransform GetButtonRow(Button button)
+        {
+            if (button == null)
+                return null;
+
+            RectTransform buttonRect = button.transform as RectTransform;
+            RectTransform parentRect = button.transform.parent as RectTransform;
+            bool parentIsSettingRow = parentRect != null
+                && parentRect.GetComponent<CanvasGroup>() == null;
+            return parentIsSettingRow && buttonRect != null && parentRect != buttonRect
+                ? parentRect
+                : buttonRect;
         }
 
         private void ConfigureSettingsButton(Button button, int row, UnityEngine.Events.UnityAction action)
@@ -500,26 +546,39 @@ namespace CyberVeil.UI
                 SetSettingsSelection(Wrap(selectedSettingsIndex + 1, settingsRows.Length));
             }
 
-            if (selectedSettingsIndex == 0)
+            if (selectedSettingsIndex == 0 || selectedSettingsIndex == 1)
             {
                 if (PressedLeft())
                 {
-                    DecreaseVolume();
+                    if (selectedSettingsIndex == 0)
+                        DecreaseVolume();
+                    else
+                        DecreaseMouseSensitivity();
                 }
                 else if (PressedRight() || PressedSubmit())
                 {
-                    IncreaseVolume();
+                    if (selectedSettingsIndex == 0)
+                        IncreaseVolume();
+                    else
+                        IncreaseMouseSensitivity();
                 }
             }
             else if (PressedSubmit())
             {
-                if (selectedSettingsIndex == 1)
+                switch (selectedSettingsIndex)
                 {
-                    ToggleFullscreen();
-                }
-                else
-                {
-                    CloseSettings();
+                    case 2:
+                        ToggleInvertY();
+                        break;
+                    case 3:
+                        ToggleMouseSmoothing();
+                        break;
+                    case 4:
+                        ToggleFullscreen();
+                        break;
+                    default:
+                        CloseSettings();
+                        break;
                 }
             }
         }
@@ -662,6 +721,7 @@ namespace CyberVeil.UI
             switch (index)
             {
                 case 0:
+                    VeilRunManager.ResetForNewRun();
                     SoundManager.PlaySound(SoundType.HOMEUIENTER, 0.3f);
                     SoundManager.PlaySound(SoundType.TRIALEND, 0.4f);
                     StartCoroutine(CollapseArchiveAndLoad());
@@ -705,6 +765,7 @@ namespace CyberVeil.UI
         {
             masterVolume = Mathf.Clamp01(PlayerPrefs.GetFloat("CyberVeil.MasterVolume", 0.75f));
             AudioListener.volume = masterVolume;
+            CameraSettings.Reload();
             UpdateSettingsLabels();
         }
 
@@ -733,11 +794,52 @@ namespace CyberVeil.UI
             UpdateSettingsLabels();
         }
 
+        public void DecreaseMouseSensitivity()
+        {
+            CameraSettings.SetSensitivity(
+                CameraSettings.Sensitivity - CameraSettings.SensitivityStep);
+            UpdateSettingsLabels();
+        }
+
+        public void IncreaseMouseSensitivity()
+        {
+            CameraSettings.SetSensitivity(
+                CameraSettings.Sensitivity + CameraSettings.SensitivityStep);
+            UpdateSettingsLabels();
+        }
+
+        public void ToggleInvertY()
+        {
+            CameraSettings.SetInvertY(!CameraSettings.InvertY);
+            UpdateSettingsLabels();
+        }
+
+        public void ToggleMouseSmoothing()
+        {
+            CameraSettings.SetSmoothingEnabled(!CameraSettings.SmoothingEnabled);
+            UpdateSettingsLabels();
+        }
+
         private void UpdateSettingsLabels()
         {
             if (volumeValueLabel != null)
             {
                 volumeValueLabel.text = Mathf.RoundToInt(masterVolume * 100f) + "%";
+            }
+
+            if (sensitivityValueLabel != null)
+            {
+                sensitivityValueLabel.text = CameraSettings.SensitivityPercent + "%";
+            }
+
+            if (invertYValueLabel != null)
+            {
+                invertYValueLabel.text = CameraSettings.InvertY ? "ON" : "OFF";
+            }
+
+            if (mouseSmoothingValueLabel != null)
+            {
+                mouseSmoothingValueLabel.text = CameraSettings.SmoothingEnabled ? "ON" : "OFF";
             }
 
             if (fullscreenValueLabel != null)

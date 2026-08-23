@@ -1,39 +1,32 @@
 using CyberVeil.Core;
-using CyberVeil.UI;
 using System.Collections;
 using UnityEngine;
 using CyberVeil.Systems;
-using static UnityEngine.Rendering.ProbeAdjustmentVolume;
+using CyberVeil.UI;
 
 namespace CyberVeil.World
 {
     [DisallowMultipleComponent]
     /// <summary>
-    /// Interactable upgrade portal that opens the UpgradeMenu and waits until it closes,
-    /// hiding the interact prompt during the interaction
+    /// Progression-only portal. Veil upgrades are granted exclusively by spawned shards.
     /// </summary>
     public class UpgradePortalInteractable : MonoBehaviour, IInteractable
     {
         [Header("UI")]
-        [SerializeField] private string portalName = "Upgrade Portal";
-        [SerializeField] private string prompt = "Upgrade";
+        [SerializeField] private string portalName = "Level Portal";
+        [SerializeField] private string prompt = "Enter Portal";
         [SerializeField] private DialogueUI dialogueUI;
-        [SerializeField] private string incompleteWavesMessage = "Clear all corrupted";
+        [SerializeField] private string incompleteWavesMessage = "Clear all waves and shape every Veil shard";
         public string Prompt => prompt;
 
         private NameTag nameTag;
 
         private Coroutine flow;
 
-        [System.Obsolete]
-        
-        /// <summary>
-        /// Opens the upgrade menu and hides the interact prompt while the menu is active
-        /// </summary>
         public void Interact(IInteractor interactor) // Called by the PlayerInteractor when the player presses E on this object
         {
-            if (flow != null) // If an interaction coroutine is already running stop it to prevent overlapping flows
-                StopCoroutine(flow);
+            if (flow != null)
+                return;
 
             var promptUI = FindObjectOfType<InteractPromptUI>(true);
             if (promptUI) promptUI.gameObject.SetActive(false);
@@ -51,17 +44,12 @@ namespace CyberVeil.World
             }
         }
 
-        [System.Obsolete]
-        /// <summary>
-        /// Coroutine that shows the upgrade menu and waits until it closes
-        /// </summary>
         private IEnumerator RunInteraction(IInteractor interactor)
         {
             // Check if all waves are complete
             WaveManager waveManager = FindObjectOfType<WaveManager>();
             if (waveManager != null && !waveManager.AreAllWavesComplete())
             {
-                // Show "Clear all corrupted" message
                 if (dialogueUI != null)
                 {
                     dialogueUI.ShowLine(incompleteWavesMessage);
@@ -72,10 +60,10 @@ namespace CyberVeil.World
                 var promptUI = FindObjectOfType<InteractPromptUI>(true);
                 if (promptUI) promptUI.gameObject.SetActive(true);
 
+                flow = null;
                 yield break;
             }
 
-            // Start a cinematic hold on the portal and keep it active while the upgrade menu is open
             bool holdStarted = false;
             if (CinematicCamera.Instance != null)
             {
@@ -85,13 +73,11 @@ namespace CyberVeil.World
 
             try
             {
-                // small delay so the camera has time to move in before the menu appears
-                yield return new WaitForSecondsRealtime(1f);
-
-                if (UpgradeMenu.Instance != null)
-                {
-                    yield return UpgradeMenu.Instance.ShowAndWait();
-                }
+                yield return new WaitForSecondsRealtime(0.6f);
+                if (waveManager != null)
+                    waveManager.ContinueAfterUpgrade();
+                else if (SceneProgressManager.Instance != null && SceneProgressManager.Instance.HasNextLevel())
+                    SceneProgressManager.Instance.LoadNextLevel();
             }
             finally
             {

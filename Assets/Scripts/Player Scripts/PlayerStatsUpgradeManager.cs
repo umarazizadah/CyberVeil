@@ -1,4 +1,5 @@
 using System;
+using CyberVeil.Systems;
 using UnityEngine;
 
 namespace CyberVeil.Player
@@ -11,6 +12,20 @@ namespace CyberVeil.Player
     public class PlayerStatsUpgradeManager : MonoBehaviour
     {
         public static PlayerStatsUpgradeManager Instance { get; private set; }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        private static void EnsureInstance()
+        {
+            if (Instance != null)
+                return;
+
+            PlayerStatsUpgradeManager existing = FindFirstObjectByType<PlayerStatsUpgradeManager>(
+                FindObjectsInactive.Include);
+            if (existing != null)
+                return;
+
+            new GameObject(nameof(PlayerStatsUpgradeManager)).AddComponent<PlayerStatsUpgradeManager>();
+        }
 
         [Header("Multipliers")]
         [Tooltip("1.0 = no change, 1.1 = +10% damage")]
@@ -43,10 +58,27 @@ namespace CyberVeil.Player
 
         // ---------------- READ API -----------------
         // Properties are "read-only", clamped or returned safely to prevent invalid values
-        public float DamageMultiplier => Mathf.Max(0f, damageMultiplier);
-        public float MaxHealthPct => Mathf.Max(0f, maxHealthPct);
+        public float DamageMultiplier => Mathf.Max(0f,
+            VeilRunManager.ModifyCurrent(VeilEffectType.GlobalDamage, damageMultiplier));
+        public float HeavyDamageMultiplier => Mathf.Max(0f,
+            VeilRunManager.ModifyCurrent(VeilEffectType.HeavyDamage, 1f));
+        public float MaxHealthMultiplier => Mathf.Max(0.01f,
+            VeilRunManager.ModifyCurrent(VeilEffectType.MaximumHealth, 1f + maxHealthPct));
+        public float MaxHealthPct => MaxHealthMultiplier - 1f;
         public float MoveSpeedAdd => moveSpeedAdd;
         public float DashDistanceAdd => dashDistanceAdd;
+
+        public float GetMoveSpeed(float baseSpeed)
+        {
+            return Mathf.Max(0f,
+                VeilRunManager.ModifyCurrent(VeilEffectType.MovementSpeed, baseSpeed + moveSpeedAdd));
+        }
+
+        public float GetDashDistance(float baseDistance)
+        {
+            return Mathf.Max(0f,
+                VeilRunManager.ModifyCurrent(VeilEffectType.DashDistance, baseDistance + dashDistanceAdd));
+        }
 
         // ---------------- WRITE API -----------------
         /// <summary>
@@ -56,5 +88,20 @@ namespace CyberVeil.Player
         public void AddMaxHealthPercent(float addPct) { maxHealthPct += addPct; OnChanged?.Invoke(); }
         public void AddMoveSpeed(float add) { moveSpeedAdd += add; OnChanged?.Invoke(); }
         public void AddDashDistance(float add) { dashDistanceAdd += add; OnChanged?.Invoke(); }
+
+        public void RefreshFromRunModifiers()
+        {
+            OnChanged?.Invoke();
+        }
+
+        /// <summary>Clears run-scoped upgrades when the player starts a genuine new run.</summary>
+        public void ResetAllUpgrades()
+        {
+            damageMultiplier = 1f;
+            maxHealthPct = 0f;
+            moveSpeedAdd = 0f;
+            dashDistanceAdd = 0f;
+            OnChanged?.Invoke();
+        }
     }
 }

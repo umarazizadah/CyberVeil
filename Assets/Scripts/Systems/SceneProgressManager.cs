@@ -13,6 +13,20 @@ namespace CyberVeil.Systems
     {
         public static SceneProgressManager Instance { get; private set; }
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        private static void EnsureInstance()
+        {
+            if (Instance != null)
+                return;
+
+            SceneProgressManager existing = FindFirstObjectByType<SceneProgressManager>(
+                FindObjectsInactive.Include);
+            if (existing != null)
+                return;
+
+            new GameObject(nameof(SceneProgressManager)).AddComponent<SceneProgressManager>();
+        }
+
         [Header("Level Scenes")]
         [Tooltip("Ordered list of level scene names")]
         [SerializeField] private string[] levelSceneNames = new string[]
@@ -35,6 +49,8 @@ namespace CyberVeil.Systems
             {
                 Instance = this;
                 DontDestroyOnLoad(gameObject);
+                SceneManager.sceneLoaded += HandleSceneLoaded;
+                SyncCurrentLevelIndex(SceneManager.GetActiveScene());
             }
             else
             {
@@ -45,8 +61,26 @@ namespace CyberVeil.Systems
 
         private void Start()
         {
-            // Determine which level we're on based on the current scene
-            string currentSceneName = SceneManager.GetActiveScene().name;
+            SyncCurrentLevelIndex(SceneManager.GetActiveScene());
+        }
+
+        private void OnDestroy()
+        {
+            if (Instance != this)
+                return;
+
+            SceneManager.sceneLoaded -= HandleSceneLoaded;
+            Instance = null;
+        }
+
+        private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            SyncCurrentLevelIndex(scene);
+        }
+
+        private void SyncCurrentLevelIndex(Scene scene)
+        {
+            string currentSceneName = scene.name;
             for (int i = 0; i < levelSceneNames.Length; i++)
             {
                 if (levelSceneNames[i] == currentSceneName)

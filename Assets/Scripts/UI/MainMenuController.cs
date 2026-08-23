@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using CyberVeil.Systems;
 
 namespace CyberVeil.UI
 {
@@ -13,6 +14,7 @@ namespace CyberVeil.UI
         /// </summary>
         public void StartGame()
         {
+            VeilRunManager.ResetForNewRun();
             SceneManager.LoadScene("CyberVeil_Level1");
         }
 

@@ -179,7 +179,7 @@ namespace CyberVeil.Enemies
                 case EnemyAIState.Attack:
                     // Executes the selected attack if cooldown has elapsed
                     // The AttackSelector chooses the most appropriate attack (range + cooldown)
-                    if (Time.time - lastAttackTime > attackCooldown)
+                    if (Time.time - lastAttackTime > attackCooldown * VeilRunManager.CurrentEnemyAttackRecoveryMultiplier)
                     {
                         lastAttackTime = Time.time;
                         currentAttack = attackSelector.GetSelectedAttack();
@@ -195,7 +195,7 @@ namespace CyberVeil.Enemies
                     // Otherwise, rechecks cooldown availability before attacking again
                     if (distanceSqr > 2.25f) // 1.5f * 1.5f = 2.25f
                         ChangeAIState(EnemyAIState.Chase);
-                    else if (Time.time - waitStartTime > waitDuration && attackSelector.HasAttackReady())
+                    else if (Time.time - waitStartTime > waitDuration * VeilRunManager.CurrentEnemyAttackRecoveryMultiplier && attackSelector.HasAttackReady())
                         ChangeAIState(EnemyAIState.Attack);
                     return;
 
