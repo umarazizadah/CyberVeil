@@ -162792,6 +162792,18 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 928571277}
     - target: {fileID: 301604811418425727, guid: cd96ca02b82ab534ba82c51722619aa3, type: 3}
+      propertyPath: attackMovementBoost
+      value: 35
+      objectReference: {fileID: 0}
+    - target: {fileID: 301604811418425727, guid: cd96ca02b82ab534ba82c51722619aa3, type: 3}
+      propertyPath: comboAttackCooldown
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 301604811418425727, guid: cd96ca02b82ab534ba82c51722619aa3, type: 3}
+      propertyPath: lightAttackDuration
+      value: 0.35
+      objectReference: {fileID: 0}
+    - target: {fileID: 301604811418425727, guid: cd96ca02b82ab534ba82c51722619aa3, type: 3}
       propertyPath: heavyChargeParticles
       value: 
       objectReference: {fileID: 1494675858}

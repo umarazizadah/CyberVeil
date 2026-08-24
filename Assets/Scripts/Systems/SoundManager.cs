@@ -136,11 +136,27 @@ namespace CyberVeil.Systems
         /// </summary>
         public static void PlaySound(SoundType sound, float volume)
         {
-            // Looks up the SoundList array using the enum index
-            AudioClip[] clips = instance.soundList[(int)sound].Sounds; // Converts the enum to an index to grab the correct sound group
-            AudioClip randomClip = clips[UnityEngine.Random.Range(0, clips.Length)]; // Picks random audio clip
-            instance.sfxAudioSource.pitch = UnityEngine.Random.Range(0.7f, 1.1f); // Randomizes pitch for sound variety
-            instance.sfxAudioSource.PlayOneShot(randomClip, volume); //Plays once
+            int soundIndex = (int)sound;
+            if (instance == null
+                || instance.sfxAudioSource == null
+                || instance.soundList == null
+                || soundIndex < 0
+                || soundIndex >= instance.soundList.Length
+                || instance.soundList[soundIndex] == null)
+            {
+                return;
+            }
+
+            AudioClip[] clips = instance.soundList[soundIndex].Sounds;
+            if (clips == null || clips.Length == 0)
+                return;
+
+            AudioClip randomClip = clips[UnityEngine.Random.Range(0, clips.Length)];
+            if (randomClip == null)
+                return;
+
+            instance.sfxAudioSource.pitch = UnityEngine.Random.Range(0.7f, 1.1f);
+            instance.sfxAudioSource.PlayOneShot(randomClip, volume);
         }
 
         public static void PlayWalkingSound(float volume)

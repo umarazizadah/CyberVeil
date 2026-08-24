@@ -35,6 +35,27 @@ namespace CyberVeil.Player
             swingRoutine = StartCoroutine(SwingSequence());
         }
 
+        /// <summary>
+        /// Shows the weapon without a second code-driven swing. Light attacks animate
+        /// the hand and arm in their AnimationClip, so moving the axe separately would
+        /// fight the authored pose and create visible sliding.
+        /// </summary>
+        public void ShowAxeStatic()
+        {
+            if (swingRoutine != null)
+            {
+                StopCoroutine(swingRoutine);
+                swingRoutine = null;
+            }
+
+            if (axeRoot != null)
+            {
+                axeRoot.localPosition = baseLocalPos;
+                axeRoot.localRotation = baseLocalRot;
+            }
+            gameObject.SetActive(true);
+        }
+
         public void HideAxe()
         {
             gameObject.SetActive(false); //disable the GameObject

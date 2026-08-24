@@ -1,35 +1,35 @@
 using System;
 using System.Collections;
+using CyberVeil.Combat;
+using CyberVeil.Core;
+using CyberVeil.Systems;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using CyberVeil.Systems;
-using CyberVeil.Combat;
-using CyberVeil.VFX;
-using CyberVeil.Core;
 
 namespace CyberVeil.Player
 {
     /// <summary>
-    /// Handles player attack input, combo management, movement boost during attack,
-    /// and coordinates attack effects, visuals, and damage
+    /// Preserves CyberVeil's original permissive attack cadence while the
+    /// data-driven combo selects the upgraded character animation and presentation.
     /// </summary>
     public class PlayerAttack : MonoBehaviour
     {
-        /// <summary>
-        /// Raised only when the attack gate rejects an otherwise requested slash.
-        /// UI feedback can subscribe without polling combat input.
-        /// </summary>
         public event Action OnAttackRejected;
+        public event Action<PlayerAttackStep, float> OnAttackStepStarted;
 
         [Header("Attack Settings")]
-        public bool canAttack = true; // Flag to prevent spam attacking
-        [SerializeField] private float attackMovementBoost = 30f; // Boost forward whenever attacking
-        [SerializeField] private int attackComboCount = 0;
-        [SerializeField] private float attackDuration = 0.45f;
-        private float comboAttackCooldown = 0.6f; // Pause after 3 hit combo
-        private float attackCooldown = 0.2f; // Quick cooldown between each attack
+        public bool canAttack = true;
+        [SerializeField] private int attackComboCount;
         [SerializeField] private float attackVolume = 0.5f;
         [SerializeField] private float slashVolume = 0.3f;
+        [SerializeField, Min(0.05f)] private float lightAttackDuration = 0.45f;
+        [SerializeField, Min(0.05f)] private float comboAttackCooldown = 0.6f;
+        [SerializeField] private float attackMovementBoost = 30f;
+        [SerializeField, Min(0.1f)] private float maximumPlaybackSpeed = 3.5f;
+
+        [Header("Combo")]
+        [SerializeField] private PlayerComboDefinition comboDefinition;
+        [SerializeField] private PlayerSlashEmitter slashEmitter;
 
         [Header("Damage Settings")]
         public float attackRange = 2f;
@@ -39,10 +39,8 @@ namespace CyberVeil.Player
         public toggleAxe toggleAxe;
         public toggleAxe2 toggleAxe2;
 
-        [Header("Slash References")]
-        public SlashAttack slash1;
-        public SlashAttack2 slash2;
-        public SlashAttack3 slash3;
+        [Header("Attack Gate")]
+        [SerializeField] private MonoBehaviour attackGateBehaviour;
 
         [Header("Heavy Slash")]
         public SlashAttackCross heavySlash;
@@ -61,38 +59,130 @@ namespace CyberVeil.Player
         [SerializeField] private ParticleSystem heavyChargeParticles;
 
         private VeilSurgeSkill veilSurgeSkill;
-        [SerializeField] private MonoBehaviour attackGateBehaviour;
         private IAttackGate attackGate;
         private PlayerController playerController;
         private CharacterStateMachine stateMachine;
-        private bool canHeavyAttack = true;
+        private PlayerAttackStep activeStep;
+        private Coroutine lightAttackWatchdog;
+        private Coroutine comboRecoveryRoutine;
+        private Coroutine weaponRevealRoutine;
         private Coroutine heavyLungeRoutine;
+        private Coroutine heavyEndRoutine;
+        private Coroutine heavyCooldownRoutine;
+        private bool lightAttackActive;
+        private bool heavyAttackActive;
+        private bool comboWindowOpen;
+        private bool bufferedAttack;
+        private bool hitResolved;
+        private bool canHeavyAttack = true;
         private bool heavyChargeInProgress;
+        private bool queuedLightAfterHeavy;
         private float heavyChargeStartTime;
+        private float lightAttackEarliestFinishTime;
+        private int attackToken;
+        private int heavyAttackToken;
 
-        private void Start()
+        public int CurrentComboStep => attackComboCount;
+        public bool IsLightAttackActive => lightAttackActive;
+        public bool IsHeavyAttackActive => heavyAttackActive;
+        public bool IsAnyAttackActive => lightAttackActive || heavyAttackActive;
+        public bool IsComboWindowOpen => comboWindowOpen;
+        public bool HasBufferedAttack => bufferedAttack || queuedLightAfterHeavy;
+
+        /// <summary>
+        /// Cancels only an attack input that has not started yet. The attack already
+        /// playing remains active, allowing dash to act as an intentional queue cancel.
+        /// </summary>
+        public bool TryCancelQueuedAttackForDash()
+        {
+            if (!bufferedAttack && !queuedLightAfterHeavy)
+                return false;
+
+            bufferedAttack = false;
+            queuedLightAfterHeavy = false;
+            return true;
+        }
+
+        private void Awake()
         {
             playerController = GetComponent<PlayerController>();
             stateMachine = GetComponent<CharacterStateMachine>();
-            attackGate = GetComponent<AttackLimiterMechanic>();
             veilSurgeSkill = GetComponent<VeilSurgeSkill>();
+            slashEmitter = slashEmitter != null ? slashEmitter : GetComponent<PlayerSlashEmitter>();
+            attackGate = attackGateBehaviour as IAttackGate;
+            if (attackGate == null)
+                attackGate = GetComponent<AttackLimiterMechanic>();
+        }
 
-            toggleAxe.HideAxe();
-            toggleAxe2.HideAxe2();
+        private void OnEnable()
+        {
+            if (stateMachine != null)
+                stateMachine.OnStateChange += OnCharacterStateChanged;
+        }
+
+        private void Start()
+        {
+            HideAxes();
+        }
+
+        private void OnDisable()
+        {
+            if (stateMachine != null)
+                stateMachine.OnStateChange -= OnCharacterStateChanged;
+
+            StopAllCoroutines();
+            lightAttackActive = false;
+            heavyAttackActive = false;
+            heavyChargeInProgress = false;
+            comboWindowOpen = false;
+            bufferedAttack = false;
+            queuedLightAfterHeavy = false;
+            canAttack = true;
+            canHeavyAttack = true;
+            activeStep = null;
+            StopHeavyChargeVfx();
+            HideAxes();
+            ResetLegacyMovementBoost();
+            if (stateMachine != null && stateMachine.CurrentState == CharacterState.Attacking)
+                stateMachine.ChangeState(CharacterState.Idle);
         }
 
         public void HandleAttackInput()
         {
-            if (stateMachine.CurrentState == CharacterState.Attacking
-                || Mouse.current == null)
+            if (Mouse.current == null || stateMachine == null)
+                return;
+
+            CharacterState state = stateMachine.CurrentState;
+            if (state == CharacterState.Damaged)
                 return;
 
             if (heavyChargeInProgress)
             {
-                if (Mouse.current.rightButton.wasReleasedThisFrame)
+                if (!Mouse.current.rightButton.isPressed)
                     ReleaseHeavyCharge();
                 return;
             }
+
+            if (heavyAttackActive)
+            {
+                if (Mouse.current.leftButton.wasPressedThisFrame)
+                {
+                    queuedLightAfterHeavy = true;
+                    if (state != CharacterState.Attacking)
+                        StartQueuedLightAfterHeavy();
+                }
+                return;
+            }
+
+            if (lightAttackActive)
+            {
+                if (Mouse.current.leftButton.wasPressedThisFrame && HasFollowingComboStep())
+                    bufferedAttack = true;
+                return;
+            }
+
+            if (state == CharacterState.Attacking)
+                return;
 
             if (Mouse.current.rightButton.wasPressedThisFrame)
             {
@@ -100,62 +190,188 @@ namespace CyberVeil.Player
                 return;
             }
 
-            if (canAttack == false || !Mouse.current.leftButton.wasPressedThisFrame)
-                return;
-
-            // Limiter check (bypass if offensive skill active)
-            if (veilSurgeSkill != null && veilSurgeSkill.ShouldBypassAttackLocking)
-            {
-                // During offensive boost, ignore attack locking
-            }
-            else if (attackGate != null && !attackGate.CanStartAttack)
-            {
-                RejectAttack();
-                return; 
-            }
-
-            // Normal attack sequence
-            StartAttack();
-            SoundManager.PlaySound(SoundType.ATTACK, attackVolume);
-            SoundManager.PlaySound(SoundType.SLASH, slashVolume);
-
-            AttackMovementBoost();
-            UpdateAxeVisuals(attackComboCount);
-            HandleComboLogic();
+            if (canAttack && Mouse.current.leftButton.wasPressedThisFrame)
+                BeginLightAttack(attackComboCount, false);
         }
 
-        private void TryStartHeavyAttack()
+        private bool BeginLightAttack(int stepIndex, bool chained)
         {
-            if (!canHeavyAttack)
-                return;
-
-            // Limiter check (bypass if offensive skill active)
-            if (veilSurgeSkill != null && veilSurgeSkill.ShouldBypassAttackLocking)
+            if ((!chained && !canAttack)
+                || comboDefinition == null
+                || !comboDefinition.TryGetStep(stepIndex, out PlayerAttackStep step))
             {
-                // During offensive boost, ignore attack locking
+                if (comboDefinition == null)
+                    Debug.LogError("PlayerAttack requires a PlayerComboDefinition.", this);
+                return false;
             }
-            else if (attackGate != null && !attackGate.CanStartAttack)
+
+            if (!CanPassAttackGate())
             {
                 RejectAttack();
-                return;
+                return false;
             }
 
-            StartHeavyAttack();
+            StopRoutine(ref comboRecoveryRoutine);
+            StopRoutine(ref lightAttackWatchdog);
+            attackGate?.RecordAttack();
+
+            attackComboCount = stepIndex;
+            activeStep = step;
+            lightAttackActive = true;
+            canAttack = false;
+            comboWindowOpen = false;
+            bufferedAttack = false;
+            hitResolved = false;
+            int token = ++attackToken;
+            lightAttackEarliestFinishTime = Time.time + Mathf.Max(0.05f, lightAttackDuration);
+
+            stateMachine.ChangeState(CharacterState.Attacking);
+            float playbackSpeed = GetEffectivePlaybackSpeed(step);
+            OnAttackStepStarted?.Invoke(step, playbackSpeed);
+            UpdateAxeVisuals(step, token);
+            OnAnimationHit();
+            ApplyLegacyAttackMovementBoost(stepIndex);
+            lightAttackWatchdog = StartCoroutine(
+                LightAttackWatchdog(token, lightAttackDuration));
+            return true;
+        }
+
+        /// <summary>
+        /// Resolves once per step. Legacy combat calls this immediately; the clip's
+        /// later Hit event becomes a harmless no-op for the already-resolved attack.
+        /// </summary>
+        public void OnAnimationHit()
+        {
+            if (!lightAttackActive || activeStep == null || hitResolved)
+                return;
+
+            hitResolved = true;
+            Vector3 direction = GetAttackDirection();
+            float range = attackRange * activeStep.RangeMultiplier;
+            var upgrades = PlayerStatsUpgradeManager.Instance;
+            float upgradeMultiplier = upgrades ? upgrades.DamageMultiplier : 1f;
+            int finalDamage = Mathf.RoundToInt(
+                attackDamage * activeStep.DamageMultiplier * upgradeMultiplier);
+
+            CombatHitResult hitResult = default;
+            if (CombatManager.Instance != null)
+            {
+                hitResult = CombatManager.Instance.DealDamageInRadiusWithResult(
+                    transform.position,
+                    range,
+                    finalDamage,
+                    gameObject);
+            }
+
+            if (slashEmitter != null)
+            {
+                slashEmitter.EmitSlash(
+                    activeStep,
+                    direction,
+                    veilSurgeSkill != null && veilSurgeSkill.IsVeilSurge);
+                if (hitResult.HitAny)
+                    slashEmitter.EmitImpact(hitResult.FirstHitPosition);
+            }
+
+            if (hitResult.HitAny
+                && activeStep.HitStopDuration > 0f
+                && HitstopManager.Instance != null)
+            {
+                HitstopManager.Instance.DoHitstop(
+                    activeStep.HitStopDuration,
+                    activeStep.HitStopTimeScale);
+            }
+
+            SoundManager.PlaySound(SoundType.ATTACK, attackVolume);
+            SoundManager.PlaySound(SoundType.SLASH, slashVolume);
+        }
+
+        public void OpenComboWindow()
+        {
+            if (!lightAttackActive || !HasFollowingComboStep())
+                return;
+
+            comboWindowOpen = true;
+        }
+
+        public void CloseComboWindow()
+        {
+            comboWindowOpen = false;
+        }
+
+        public void FinishLightAttack()
+        {
+            if (!lightAttackActive || activeStep == null || comboDefinition == null)
+                return;
+
+            // Fast animation playback (for example Veil Surge) may reach the clip's
+            // Finish event early. The original combat always held a light attack for
+            // its fixed duration, so presentation cannot shorten that gameplay lock.
+            if (Time.time + 0.005f < lightAttackEarliestFinishTime)
+                return;
+
+            if (!hitResolved)
+                OnAnimationHit();
+
+            StopRoutine(ref lightAttackWatchdog);
+            comboWindowOpen = false;
+            int completedIndex = attackComboCount;
+            int nextIndex = (completedIndex + 1) % comboDefinition.StepCount;
+            bool completedCombo = completedIndex >= comboDefinition.StepCount - 1;
+            bool shouldChain = bufferedAttack
+                && !completedCombo;
+
+            lightAttackActive = false;
+            bufferedAttack = false;
+            activeStep = null;
+
+            if (shouldChain && BeginLightAttack(nextIndex, true))
+                return;
+
+            attackComboCount = nextIndex;
+            HideAxes();
+            if (stateMachine.CurrentState == CharacterState.Attacking)
+                stateMachine.ChangeState(CharacterState.Idle);
+
+            if (completedCombo)
+            {
+                float recovery = GetLegacyComboRecoveryDuration();
+                if (recovery > 0f)
+                {
+                    canAttack = false;
+                    comboRecoveryRoutine = StartCoroutine(
+                        UnlockLightAttackAfterDelay(recovery, attackToken));
+                    return;
+                }
+            }
+
+            canAttack = true;
+        }
+
+        private IEnumerator LightAttackWatchdog(int token, float duration)
+        {
+            yield return new WaitForSeconds(Mathf.Max(0.05f, duration));
+            if (lightAttackActive && token == attackToken)
+            {
+                lightAttackWatchdog = null;
+                FinishLightAttack();
+            }
+        }
+
+        private IEnumerator UnlockLightAttackAfterDelay(float delay, int token)
+        {
+            yield return new WaitForSeconds(delay);
+            if (!lightAttackActive && token == attackToken)
+                canAttack = true;
+            comboRecoveryRoutine = null;
         }
 
         private void BeginHeavyCharge()
         {
-            if (!canHeavyAttack)
-                return;
-
-            // Limiter check (bypass if offensive skill active)
-            if (veilSurgeSkill != null && veilSurgeSkill.ShouldBypassAttackLocking)
+            if (!canHeavyAttack || lightAttackActive || !CanPassAttackGate())
             {
-                // During offensive boost, ignore attack locking
-            }
-            else if (attackGate != null && !attackGate.CanStartAttack)
-            {
-                RejectAttack();
+                if (canHeavyAttack && !lightAttackActive)
+                    RejectAttack();
                 return;
             }
 
@@ -172,152 +388,220 @@ namespace CyberVeil.Player
 
             heavyChargeInProgress = false;
             StopHeavyChargeVfx();
-
-            float heldTime = Time.time - heavyChargeStartTime;
-            if (heldTime >= heavyChargeSeconds)
-            {
+            if (Time.time - heavyChargeStartTime >= heavyChargeSeconds)
                 TryStartHeavyAttack();
+            else
+                HideAxes();
+        }
+
+        private void TryStartHeavyAttack()
+        {
+            if (!canHeavyAttack || !CanPassAttackGate())
+            {
+                if (canHeavyAttack)
+                    RejectAttack();
                 return;
             }
-
-            HideAxes();
+            StartHeavyAttack();
         }
 
         private void StartHeavyAttack()
         {
             attackGate?.RecordAttack();
             canHeavyAttack = false;
+            heavyAttackActive = true;
+            queuedLightAfterHeavy = false;
+            int token = ++heavyAttackToken;
             stateMachine.ChangeState(CharacterState.Attacking);
-            Invoke(nameof(EndAttack), heavyAttackDuration);
 
-            // Damage
-            var mods = PlayerStatsUpgradeManager.Instance;
-            float dmgMul = mods ? mods.DamageMultiplier : 1f;
-            float heavyUpgradeMul = mods ? mods.HeavyDamageMultiplier : VeilRunManager.CurrentHeavyDamageMultiplier;
+            var upgrades = PlayerStatsUpgradeManager.Instance;
+            float damageMultiplier = upgrades ? upgrades.DamageMultiplier : 1f;
+            float heavyUpgradeMultiplier = upgrades
+                ? upgrades.HeavyDamageMultiplier
+                : VeilRunManager.CurrentHeavyDamageMultiplier;
             float range = heavyAttackRange > 0f ? heavyAttackRange : attackRange;
-            int finalDamage = Mathf.RoundToInt(attackDamage * heavyDamageMultiplier * dmgMul * heavyUpgradeMul);
-            CombatManager.Instance.DealDamageInRadius(transform.position, range, finalDamage, gameObject);
+            int finalDamage = Mathf.RoundToInt(
+                attackDamage * heavyDamageMultiplier * damageMultiplier * heavyUpgradeMultiplier);
+            CombatManager.Instance?.DealDamageInRadius(
+                transform.position,
+                range,
+                finalDamage,
+                gameObject);
 
-            Vector3 attackDirection = playerController.GetLastDirection();
-            if (heavySlash != null)
-                heavySlash.PlaySlash(attackDirection);
-
+            Vector3 direction = GetAttackDirection();
+            heavySlash?.PlaySlash(direction);
             StopHeavyChargeVfx();
             ShowHeavyAxes();
-
             SoundManager.PlaySound(SoundType.ATTACK, attackVolume);
             SoundManager.PlaySound(SoundType.SLASH, slashVolume);
 
-            if (heavyLungeRoutine != null)
-                StopCoroutine(heavyLungeRoutine);
-            heavyLungeRoutine = StartCoroutine(HeavyLungeRoutine(attackDirection));
-
-            Invoke(nameof(ResetHeavyAttackCooldown), heavyAttackCooldown);
+            StopRoutine(ref heavyLungeRoutine);
+            heavyLungeRoutine = StartCoroutine(HeavyLungeRoutine(direction));
+            StopRoutine(ref heavyEndRoutine);
+            heavyEndRoutine = StartCoroutine(EndHeavyAttackAfterDelay(token));
+            StopRoutine(ref heavyCooldownRoutine);
+            heavyCooldownRoutine = StartCoroutine(ResetHeavyCooldownAfterDelay());
         }
 
-        private void StartAttack()
+        private IEnumerator EndHeavyAttackAfterDelay(int token)
         {
-            attackGate?.RecordAttack();
-            stateMachine.ChangeState(CharacterState.Attacking);
-            Invoke(nameof(EndAttack), attackDuration);
+            yield return new WaitForSeconds(heavyAttackDuration);
+            if (heavyAttackActive && token == heavyAttackToken)
+            {
+                heavyAttackActive = false;
+                HideHeavyAxes();
+                if (stateMachine.CurrentState == CharacterState.Attacking)
+                    stateMachine.ChangeState(CharacterState.Idle);
 
-            // Reads DamageMultiplier from the manager, if mods is null it safely falls back to 1f (no bonus)
-            var mods = PlayerStatsUpgradeManager.Instance;
-            float dmgMul = mods ? mods.DamageMultiplier : 1f;
-            int finalDamage = Mathf.RoundToInt(attackDamage * dmgMul);
-            CombatManager.Instance.DealDamageInRadius(transform.position, attackRange, finalDamage, gameObject);
-
-            // Trigger slash effect using centralized ParticleManager
-            Vector3 attackDirection = playerController.GetLastDirection();
-
-            if (attackComboCount == 0)
-                slash1.PlaySlash(attackDirection);
-            else if (attackComboCount == 1)
-                slash2.PlaySlash(attackDirection);
-            else if (attackComboCount == 2)
-                slash3.PlaySlash(attackDirection);
+                heavyEndRoutine = null;
+                if (queuedLightAfterHeavy)
+                    StartQueuedLightAfterHeavy();
+                yield break;
+            }
+            heavyEndRoutine = null;
         }
 
-        private void EndAttack()
+        private void StartQueuedLightAfterHeavy()
         {
-            StopHeavyChargeVfx();
-            HideAxes();
-            stateMachine.ChangeState(CharacterState.Idle);
+            if (!queuedLightAfterHeavy || comboDefinition == null)
+                return;
+
+            queuedLightAfterHeavy = false;
+            ++heavyAttackToken;
+            heavyAttackActive = false;
+            StopRoutine(ref heavyEndRoutine);
+            HideHeavyAxes();
+            canAttack = true;
+
+            if (!BeginLightAttack(attackComboCount, true)
+                && stateMachine.CurrentState == CharacterState.Attacking)
+            {
+                stateMachine.ChangeState(CharacterState.Idle);
+            }
+        }
+
+        private IEnumerator ResetHeavyCooldownAfterDelay()
+        {
+            yield return new WaitForSeconds(heavyAttackCooldown);
+            canHeavyAttack = true;
+            heavyCooldownRoutine = null;
         }
 
         private IEnumerator HeavyLungeRoutine(Vector3 direction)
         {
-            if (playerController == null)
-                yield break;
-
-            CharacterController controller = playerController.GetCharacterController();
+            CharacterController controller = playerController?.GetCharacterController();
             if (controller == null)
+            {
+                heavyLungeRoutine = null;
                 yield break;
+            }
 
             float duration = Mathf.Max(0.01f, heavyLungeDuration);
             Vector3 start = transform.position;
             Vector3 forward = direction.sqrMagnitude > 0.001f ? direction.normalized : transform.forward;
             Vector3 last = start;
             float elapsed = 0f;
-
             while (elapsed < duration)
             {
                 elapsed += Time.deltaTime;
                 float t = Mathf.Clamp01(elapsed / duration);
                 float height = Mathf.Sin(t * Mathf.PI) * heavyLungeHeight;
                 Vector3 target = start + forward * (heavyLungeDistance * t) + Vector3.up * height;
-                Vector3 delta = target - last;
-                controller.Move(delta);
+                controller.Move(target - last);
                 last = target;
                 yield return null;
             }
+            heavyLungeRoutine = null;
         }
 
-        private void AttackMovementBoost()
+        private void ApplyLegacyAttackMovementBoost(int stepIndex)
         {
+            CharacterController controller = playerController?.GetCharacterController();
+            if (playerController == null || controller == null)
+                return;
+
             playerController.speed = 1f;
-            attackMovementBoost -= 10;
-            Vector3 attackMove = playerController.GetLastDirection() * attackMovementBoost * Time.deltaTime;
-            playerController.GetCharacterController().Move(attackMove);
+            attackMovementBoost -= 10f;
+            controller.Move(GetAttackDirection() * attackMovementBoost * Time.deltaTime);
+
+            if (comboDefinition != null && stepIndex >= comboDefinition.StepCount - 1)
+            {
+                attackMovementBoost = 30f;
+                playerController.speed = playerController.defaultSpeed;
+            }
         }
 
-        private void UpdateAxeVisuals(int comboCount)
+        private void UpdateAxeVisuals(PlayerAttackStep step, int token)
         {
-            if (comboCount == 0 || comboCount == 2)
+            StopRoutine(ref weaponRevealRoutine);
+            HideAxesImmediately();
+            float revealDelay = Mathf.Clamp(step.CrossFadeTime, 0f, 0.06f);
+            if (revealDelay > 0f)
             {
-                toggleAxe.ShowAxe();
+                weaponRevealRoutine = StartCoroutine(
+                    RevealStepAxeAfterDelay(step, token, revealDelay));
+                return;
             }
-            if (comboCount == 1)
+
+            ShowStepAxe(step);
+        }
+
+        private IEnumerator RevealStepAxeAfterDelay(
+            PlayerAttackStep step,
+            int token,
+            float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            weaponRevealRoutine = null;
+            if (lightAttackActive && token == attackToken && activeStep == step)
+                ShowStepAxe(step);
+        }
+
+        private void ShowStepAxe(PlayerAttackStep step)
+        {
+            if (step.UseSecondaryAxe)
             {
-                toggleAxe2.HideAxe2();
-                toggleAxe2.ShowAxe2();
+                toggleAxe2?.ShowAxe2Static();
+            }
+            else
+            {
+                toggleAxe?.ShowAxeStatic();
             }
         }
 
         private void ShowHeavyAxes()
         {
-            if (toggleAxe != null)
-                toggleAxe.ShowAxe();
+            toggleAxe?.ShowAxe();
             if (toggleAxe2 != null)
             {
-                toggleAxe2.HideAxe2();
+                toggleAxe2.HideAxe2Immediate();
                 toggleAxe2.ShowAxe2();
             }
         }
 
+        private void HideHeavyAxes()
+        {
+            StopRoutine(ref weaponRevealRoutine);
+            toggleAxe?.HideAxe();
+            toggleAxe2?.HideAxe2();
+        }
+
         private void HideAxes()
         {
-            if (toggleAxe != null)
-                toggleAxe.HideAxe();
-            if (toggleAxe2 != null)
-                toggleAxe2.HideAxe2();
+            StopRoutine(ref weaponRevealRoutine);
+            HideAxesImmediately();
+        }
+
+        private void HideAxesImmediately()
+        {
+            toggleAxe?.HideAxe();
+            toggleAxe2?.HideAxe2Immediate();
         }
 
         private void StartHeavyChargeVfx()
         {
             if (heavyChargeParticles == null)
                 return;
-
             heavyChargeParticles.gameObject.SetActive(true);
             if (!heavyChargeParticles.isPlaying)
                 heavyChargeParticles.Play();
@@ -327,51 +611,118 @@ namespace CyberVeil.Player
         {
             if (heavyChargeParticles == null)
                 return;
-
             if (heavyChargeParticles.isPlaying)
-                heavyChargeParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            {
+                heavyChargeParticles.Stop(
+                    true,
+                    ParticleSystemStopBehavior.StopEmittingAndClear);
+            }
             heavyChargeParticles.gameObject.SetActive(false);
         }
 
-        private void HandleComboLogic()
+        private void OnCharacterStateChanged(CharacterState state)
         {
-            attackComboCount++;
-            canAttack = false;
-
-            // Get attack speed multiplier from skill
-            float attackCooldownMultiplier = 1f;
-            if (veilSurgeSkill != null && veilSurgeSkill);
+            if (state == CharacterState.Damaged)
             {
-                attackCooldownMultiplier = 1f / veilSurgeSkill.GetAttackSpeedMultiplier();
+                CancelAttackForInterruption();
+                return;
             }
 
-            if (attackComboCount != 3)
+            // The old combat allowed another state (most notably the dash coroutine)
+            // to release the Attacking state while the heavy attack was still running.
+            // Preserve that as an explicit buffered link instead of competing Invokes.
+            if (state == CharacterState.Idle
+                && heavyAttackActive
+                && queuedLightAfterHeavy)
             {
-                Invoke(nameof(ResetAttackCooldown), attackCooldown * attackCooldownMultiplier);
-            }
-            else
-            {
-                Invoke(nameof(ResetAttackCooldown), comboAttackCooldown * attackCooldownMultiplier);
-                attackComboCount = 0;
-                attackMovementBoost = 30f;
-                playerController.speed = playerController.defaultSpeed;
+                StartQueuedLightAfterHeavy();
             }
         }
 
-        private void ResetAttackCooldown()
+        private void CancelAttackForInterruption()
         {
+            ++attackToken;
+            ++heavyAttackToken;
+            lightAttackActive = false;
+            heavyAttackActive = false;
+            heavyChargeInProgress = false;
+            comboWindowOpen = false;
+            bufferedAttack = false;
+            queuedLightAfterHeavy = false;
+            hitResolved = false;
+            activeStep = null;
             canAttack = true;
+            attackComboCount = 0;
+            StopRoutine(ref lightAttackWatchdog);
+            StopRoutine(ref comboRecoveryRoutine);
+            StopRoutine(ref heavyEndRoutine);
+            StopRoutine(ref heavyLungeRoutine);
+            StopHeavyChargeVfx();
+            HideAxes();
+            ResetLegacyMovementBoost();
         }
 
-        private void ResetHeavyAttackCooldown()
+        private bool HasFollowingComboStep()
         {
-            canHeavyAttack = true;
+            return comboDefinition != null
+                && attackComboCount >= 0
+                && attackComboCount < comboDefinition.StepCount - 1;
+        }
+
+        private float GetLegacyComboRecoveryDuration()
+        {
+            float surgeMultiplier = veilSurgeSkill != null
+                ? Mathf.Max(0.05f, veilSurgeSkill.GetAttackSpeedMultiplier())
+                : 1f;
+            float legacyTotalCooldown = comboAttackCooldown / surgeMultiplier;
+            return Mathf.Max(0f, legacyTotalCooldown - lightAttackDuration);
+        }
+
+        private void ResetLegacyMovementBoost()
+        {
+            attackMovementBoost = 30f;
+            if (playerController != null)
+                playerController.speed = playerController.defaultSpeed;
+        }
+
+        private bool CanPassAttackGate()
+        {
+            if (veilSurgeSkill != null && veilSurgeSkill.ShouldBypassAttackLocking)
+                return true;
+            return attackGate == null || attackGate.CanStartAttack;
+        }
+
+        private float GetEffectivePlaybackSpeed(PlayerAttackStep step)
+        {
+            float surgeMultiplier = veilSurgeSkill != null
+                ? veilSurgeSkill.GetAttackSpeedMultiplier()
+                : 1f;
+            return Mathf.Clamp(
+                step.PlaybackSpeed * surgeMultiplier,
+                0.05f,
+                Mathf.Max(0.1f, maximumPlaybackSpeed));
+        }
+
+        private Vector3 GetAttackDirection()
+        {
+            Vector3 direction = playerController != null
+                ? playerController.GetAttackAimDirection()
+                : transform.forward;
+            return direction.sqrMagnitude > 0.001f ? direction.normalized : transform.forward;
         }
 
         private void RejectAttack()
         {
             SoundManager.PlaySound(SoundType.ATTACKLOCK, 0.6f);
             OnAttackRejected?.Invoke();
+        }
+
+        private void StopRoutine(ref Coroutine routine)
+        {
+            if (routine == null)
+                return;
+            StopCoroutine(routine);
+            routine = null;
         }
     }
 }

@@ -148,10 +148,6 @@ namespace CyberVeil.Player
         {
             if (mainCamera == null || characterController == null) return;
 
-            // If attacking, fully lock movement (same as original intent)
-            if (stateMachine != null && stateMachine.CurrentState == CharacterState.Attacking)
-                return;
-
             // Camera-relative planar axes
             Vector3 cameraForward = mainCamera.transform.forward;
             Vector3 cameraRight = mainCamera.transform.right;
@@ -167,6 +163,21 @@ namespace CyberVeil.Player
             Vector3 inputDirection = cameraForward * move.y + cameraRight * move.x;
             if (hasInput && inputDirection.sqrMagnitude > 0.0001f)
                 inputDirection.Normalize();
+
+            // Authored attacks still lock planar movement, but aiming must remain
+            // responsive between combo steps. The old input-driven sequence briefly
+            // returned to locomotion between slashes, which refreshed this direction.
+            // Buffered clips no longer have that gap, so update facing explicitly.
+            if (stateMachine != null && stateMachine.CurrentState == CharacterState.Attacking)
+            {
+                UpdateFacing(inputDirection, hasInput, false);
+                if (hasInput)
+                {
+                    movementHeading = inputDirection;
+                    lastDirection = inputDirection;
+                }
+                return;
+            }
 
             // Determine target walk speed (includes upgrades, exactly like before)
             var mods = PlayerStatsUpgradeManager.Instance;
@@ -216,27 +227,7 @@ namespace CyberVeil.Player
             // Keep rotation locked when dashing 
             bool isDashing = (playerDash != null && playerDash.IsDashing);
 
-            if (!isDashing && hasInput)
-            {
-                SignedTurnAngle = Vector3.SignedAngle(
-                    transform.forward,
-                    inputDirection,
-                    Vector3.up);
-                float facingDot = Vector3.Dot(transform.forward, inputDirection);
-                float degreesPerSecond = facingDot < sharpTurnDotThreshold ? sharpTurnSpeed : turnSpeed;
-                Quaternion targetRotation = Quaternion.LookRotation(inputDirection);
-                transform.rotation = Quaternion.RotateTowards(
-                    transform.rotation,
-                    targetRotation,
-                    degreesPerSecond * Time.deltaTime);
-            }
-            else
-            {
-                SignedTurnAngle = Mathf.MoveTowards(
-                    SignedTurnAngle,
-                    0f,
-                    sharpTurnSpeed * Time.deltaTime);
-            }
+            UpdateFacing(inputDirection, hasInput, isDashing);
 
             // Final movement vector (keep dash behavior the same)
             Vector3 movement = planarVelocity;
@@ -258,6 +249,32 @@ namespace CyberVeil.Player
             }
 
             characterController.Move((movement + verticalVelocity) * Time.deltaTime);
+        }
+
+        private void UpdateFacing(Vector3 inputDirection, bool hasInput, bool rotationLocked)
+        {
+            if (!rotationLocked && hasInput)
+            {
+                SignedTurnAngle = Vector3.SignedAngle(
+                    transform.forward,
+                    inputDirection,
+                    Vector3.up);
+                float facingDot = Vector3.Dot(transform.forward, inputDirection);
+                float degreesPerSecond = facingDot < sharpTurnDotThreshold
+                    ? sharpTurnSpeed
+                    : turnSpeed;
+                Quaternion targetRotation = Quaternion.LookRotation(inputDirection);
+                transform.rotation = Quaternion.RotateTowards(
+                    transform.rotation,
+                    targetRotation,
+                    degreesPerSecond * Time.deltaTime);
+                return;
+            }
+
+            SignedTurnAngle = Mathf.MoveTowards(
+                SignedTurnAngle,
+                0f,
+                sharpTurnSpeed * Time.deltaTime);
         }
 
         /// <summary>
@@ -322,6 +339,23 @@ namespace CyberVeil.Player
         // Getters
         public Vector2 GetMoveInput() { return move; }
         public Vector3 GetLastDirection() { return lastDirection; }
+        public Vector3 GetAttackAimDirection()
+        {
+            if (mainCamera == null || RemapInputMagnitude(Mathf.Clamp01(move.magnitude)) <= 0f)
+                return lastDirection;
+
+            Vector3 cameraForward = mainCamera.transform.forward;
+            Vector3 cameraRight = mainCamera.transform.right;
+            cameraForward.y = 0f;
+            cameraRight.y = 0f;
+            cameraForward.Normalize();
+            cameraRight.Normalize();
+
+            Vector3 inputDirection = cameraForward * move.y + cameraRight * move.x;
+            return inputDirection.sqrMagnitude > 0.0001f
+                ? inputDirection.normalized
+                : lastDirection;
+        }
         public CharacterController GetCharacterController() { return characterController; }
     }
 }

@@ -31,6 +31,7 @@ namespace CyberVeil.Core
         private Animator animator;
         private CharacterStateMachine stateMachine;
         private PlayerController playerController;
+        private PlayerAttack playerAttack;
         private Transform spine1;
         private Transform spine2;
         private Transform spine3;
@@ -45,6 +46,7 @@ namespace CyberVeil.Core
         private float smoothedBank;
         private float smoothedTwist;
         private bool wasInputMoving;
+        private bool hasAttackSpeedParameter;
 
         // Using Animator.StringToHash to avoid expensive string lookups at runtime
         private static readonly int animIDIdle = Animator.StringToHash("Idle");
@@ -57,12 +59,22 @@ namespace CyberVeil.Core
         private static readonly int animIDBrake = Animator.StringToHash("LocomotionBrake");
         private static readonly int animIDTurnLeft = Animator.StringToHash("TurnLeft");
         private static readonly int animIDTurnRight = Animator.StringToHash("TurnRight");
+        private static readonly int animIDAttackSpeed = Animator.StringToHash("AttackSpeed");
 
         private void Awake()
         {
             animator = GetComponent<Animator>();
             stateMachine = GetComponent<CharacterStateMachine>();
             playerController = GetComponent<PlayerController>();
+            playerAttack = GetComponent<PlayerAttack>();
+            foreach (AnimatorControllerParameter parameter in animator.parameters)
+            {
+                if (parameter.nameHash == animIDAttackSpeed)
+                {
+                    hasAttackSpeedParameter = true;
+                    break;
+                }
+            }
 
             spine1 = transform.Find("Armature/Spine1");
             spine2 = transform.Find("Armature/Spine1/Spine2");
@@ -73,6 +85,8 @@ namespace CyberVeil.Core
         {
             if (stateMachine != null)
                 stateMachine.OnStateChange += OnPlayerStateChanged;
+            if (playerAttack != null)
+                playerAttack.OnAttackStepStarted += OnAttackStepStarted;
         }
 
         private void Start()
@@ -85,12 +99,23 @@ namespace CyberVeil.Core
         {
             if (stateMachine != null)
                 stateMachine.OnStateChange -= OnPlayerStateChanged;
+            if (playerAttack != null)
+                playerAttack.OnAttackStepStarted -= OnAttackStepStarted;
         }
 
         private void Update()
         {
             if (animator == null || playerController == null || stateMachine == null)
                 return;
+
+            // Combat and dash movement were allowed to overlap in the original
+            // controller. Keep the attack clip authoritative even if the dash
+            // coroutine temporarily reports Dashing or Idle underneath it.
+            if (playerAttack != null && playerAttack.IsAnyAttackActive)
+            {
+                wasInputMoving = false;
+                return;
+            }
 
             CharacterState state = stateMachine.CurrentState;
             if (IsCombatState(state))
@@ -156,6 +181,17 @@ namespace CyberVeil.Core
         /// </summary>
         private void OnPlayerStateChanged(CharacterState newState)
         {
+            if (newState != CharacterState.Attacking
+                && newState != CharacterState.Damaged
+                && playerAttack != null
+                && playerAttack.IsAnyAttackActive)
+            {
+                return;
+            }
+
+            if (newState != CharacterState.Attacking)
+                SetAttackSpeed(1f);
+
             switch (newState)
             {
                 case CharacterState.Dashing:
@@ -175,6 +211,20 @@ namespace CyberVeil.Core
             }
         }
 
+        private void OnAttackStepStarted(PlayerAttackStep step, float playbackSpeed)
+        {
+            if (step == null)
+                return;
+
+            ClearLocomotionImpulse();
+            SetAttackSpeed(playbackSpeed);
+            PlayState(
+                step.AnimatorStateHash,
+                step.CrossFadeTime,
+                animIDAttack,
+                true);
+        }
+
         private void LateUpdate()
         {
             if (playerController == null || stateMachine == null || spine1 == null)
@@ -184,7 +234,8 @@ namespace CyberVeil.Core
             if (deltaTime <= 0f)
                 return;
 
-            bool allowPose = !IsCombatState(stateMachine.CurrentState)
+            bool allowPose = (playerAttack == null || !playerAttack.IsAnyAttackActive)
+                && !IsCombatState(stateMachine.CurrentState)
                 && stateMachine.CurrentState != CharacterState.Dashing;
 
             startPoseStrength = Mathf.MoveTowards(
@@ -221,9 +272,13 @@ namespace CyberVeil.Core
             ApplyWorldPoseOffset(spine3, 0.17f);
         }
 
-        private void PlayState(int stateHash, float transition, int fallbackHash = 0)
+        private void PlayState(
+            int stateHash,
+            float transition,
+            int fallbackHash = 0,
+            bool forceRestart = false)
         {
-            if (animator == null || activeStateHash == stateHash)
+            if (animator == null || (!forceRestart && activeStateHash == stateHash))
                 return;
 
             int resolvedHash = animator.HasState(0, stateHash)
@@ -234,6 +289,12 @@ namespace CyberVeil.Core
 
             animator.CrossFadeInFixedTime(resolvedHash, transition, 0, 0f);
             activeStateHash = resolvedHash;
+        }
+
+        private void SetAttackSpeed(float speed)
+        {
+            if (animator != null && hasAttackSpeedParameter)
+                animator.SetFloat(animIDAttackSpeed, Mathf.Max(0.05f, speed));
         }
 
         private void ApplyWorldPoseOffset(Transform bone, float weight)
@@ -258,6 +319,10 @@ namespace CyberVeil.Core
             startPoseStrength = 0f;
             brakePoseStrength = 0f;
             transientStateUntil = 0f;
+            smoothedTurn = 0f;
+            smoothedForwardLean = 0f;
+            smoothedBank = 0f;
+            smoothedTwist = 0f;
             wasInputMoving = false;
         }
 

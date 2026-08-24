@@ -32,6 +32,7 @@ namespace CyberVeil.Player
         public DissolveEffectHandler dissolveHandler;
         private CharacterStateMachine playerState; 
         private CharacterController controller;
+        private PlayerAttack playerAttack;
 
         private bool isDashing = false;
         private bool canDash = true;
@@ -52,6 +53,7 @@ namespace CyberVeil.Player
         {
             playerState = GetComponent<CharacterStateMachine>();
             controller = GetComponent<CharacterController>();
+            playerAttack = GetComponent<PlayerAttack>();
             if (mainCam == null) mainCam = Camera.main;
             originalFOV = mainCam.fieldOfView;
         }
@@ -77,7 +79,16 @@ namespace CyberVeil.Player
                 return;
             lastProcessedDashInputFrame = Time.frameCount;
 
-            if (!canDash || isDashing || playerState == null || playerState.CurrentState == CharacterState.Attacking)
+            if (!canDash || isDashing || playerState == null)
+            {
+                OnDashRejected?.Invoke();
+                return;
+            }
+
+            // A queued slash has not begun and has produced no damage yet. Let dash
+            // cancel that future action while the currently playing slash finishes.
+            if (playerState.CurrentState == CharacterState.Attacking
+                && (playerAttack == null || !playerAttack.TryCancelQueuedAttackForDash()))
             {
                 OnDashRejected?.Invoke();
                 return;

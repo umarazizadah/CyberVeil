@@ -89,10 +89,29 @@ namespace CyberVeil.VFX
         /// </summary>
         public void PlayEffect(VFXType type, Vector3 position, Quaternion rotation)
         {
+            TryPlayEffect(type, position, rotation);
+        }
+
+        /// <summary>
+        /// Reports whether the active scene has a pool for this effect. This lets a
+        /// caller choose a fallback without intentionally producing a warning first.
+        /// </summary>
+        public bool HasEffect(VFXType type)
+        {
+            return vfxPools.ContainsKey(type);
+        }
+
+        /// <summary>
+        /// Attempts to play an effect and reports whether that effect is configured in
+        /// the active scene. Callers can provide a graceful fallback without producing
+        /// duplicate warnings or reaching into the pool implementation.
+        /// </summary>
+        public bool TryPlayEffect(VFXType type, Vector3 position, Quaternion rotation)
+        {
             if (!vfxPools.ContainsKey(type))
             {
                 Debug.LogWarning($"No pool found for VFX type {type}");
-                return;
+                return false;
             }
 
             ParticleSystem ps = GetFromPool(type);
@@ -104,6 +123,7 @@ namespace CyberVeil.VFX
 
             // Return the effect to the pool after it finishes playing
             StartCoroutine(ReturnToPoolAfterDelay(type, ps, ps.main.duration + 0.5f));
+            return true;
         }
 
         /// <summary>

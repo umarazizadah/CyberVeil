@@ -41,6 +41,18 @@ namespace CyberVeil.Player
             swingRoutine = StartCoroutine(SwingSequence());
         }
 
+        /// <summary>Shows the weapon while leaving motion to the authored attack clip.</summary>
+        public void ShowAxe2Static()
+        {
+            if (hideRoutine != null)
+            {
+                StopCoroutine(hideRoutine);
+                hideRoutine = null;
+            }
+            StopSwingAndReset();
+            gameObject.SetActive(true);
+        }
+
         public void HideAxe2()
         {
             if (gameObject.activeInHierarchy)
@@ -49,6 +61,18 @@ namespace CyberVeil.Player
                     StopCoroutine(hideRoutine);
                 hideRoutine = StartCoroutine(HideAxeWithDelay(0.35f));
             }
+        }
+
+        /// <summary>Immediately hides and resets the secondary weapon.</summary>
+        public void HideAxe2Immediate()
+        {
+            if (hideRoutine != null)
+            {
+                StopCoroutine(hideRoutine);
+                hideRoutine = null;
+            }
+            StopSwingAndReset();
+            gameObject.SetActive(false);
         }
 
         private IEnumerator HideAxeWithDelay(float delay)

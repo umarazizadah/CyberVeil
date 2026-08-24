@@ -5268,6 +5268,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a712a28b761f850408e3ea1263fbb508, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  axeRoot: {fileID: 0}
+  windupLocalOffset: {x: 0, y: 0, z: -0.05}
+  windupLocalEuler: {x: -10, y: -35, z: -35}
+  swingLocalOffset: {x: 0, y: 0, z: 0.08}
+  swingLocalEuler: {x: 20, y: 55, z: 70}
+  windupSeconds: 0.06
+  swingSeconds: 0.1
+  returnSeconds: 0.14
 --- !u!1 &3462685889046471665
 GameObject:
   m_ObjectHideFlags: 0
@@ -5812,6 +5820,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae3a9c159b474884f94143e74fc76704, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  axeRoot: {fileID: 0}
+  windupLocalOffset: {x: 0, y: 0, z: -0.05}
+  windupLocalEuler: {x: -10, y: 35, z: 35}
+  swingLocalOffset: {x: 0, y: 0, z: 0.08}
+  swingLocalEuler: {x: 10, y: -20, z: -20}
+  windupSeconds: 0.56
+  swingSeconds: 1
+  returnSeconds: 0.54
 --- !u!1 &6618707901180173855
 GameObject:
   m_ObjectHideFlags: 0
@@ -5911,6 +5927,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a712a28b761f850408e3ea1263fbb508, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  axeRoot: {fileID: 0}
+  windupLocalOffset: {x: 0, y: 0, z: -0.05}
+  windupLocalEuler: {x: -10, y: -35, z: -35}
+  swingLocalOffset: {x: 0, y: 0, z: 0.08}
+  swingLocalEuler: {x: 20, y: 55, z: 70}
+  windupSeconds: 0.06
+  swingSeconds: 0.1
+  returnSeconds: 0.14
 --- !u!1 &6711444143528242860
 GameObject:
   m_ObjectHideFlags: 0
@@ -6493,6 +6517,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae3a9c159b474884f94143e74fc76704, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  axeRoot: {fileID: 0}
+  windupLocalOffset: {x: 0, y: 0, z: -0.05}
+  windupLocalEuler: {x: -10, y: 35, z: 35}
+  swingLocalOffset: {x: 0, y: 0, z: 0.08}
+  swingLocalEuler: {x: 10, y: -20, z: -20}
+  windupSeconds: 0.56
+  swingSeconds: 1
+  returnSeconds: 0.54
 --- !u!1 &8854046525005191776
 GameObject:
   m_ObjectHideFlags: 0
@@ -6640,6 +6672,8 @@ GameObject:
   - component: {fileID: 5307820769040673140}
   - component: {fileID: 7076401021359102145}
   - component: {fileID: 1021521137203802935}
+  - component: {fileID: 9007100512746543546}
+  - component: {fileID: 2499930736866876953}
   m_Layer: 0
   m_Name: CyberKnight
   m_TagString: Player
@@ -6907,19 +6941,30 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   canAttack: 1
-  attackMovementBoost: 30
   attackComboCount: 0
-  attackDuration: 0.35
   attackVolume: 0.5
   slashVolume: 0.3
+  lightAttackDuration: 0.45
+  comboAttackCooldown: 0.6
+  attackMovementBoost: 30
+  maximumPlaybackSpeed: 3.5
+  comboDefinition: {fileID: 11400000, guid: 29c53811cabd09f46bd2e3ea912bcbbd, type: 2}
+  slashEmitter: {fileID: 9007100512746543546}
   attackRange: 2
   attackDamage: 25
   toggleAxe: {fileID: 6679853431289264556}
   toggleAxe2: {fileID: 7803816212305273435}
-  slash1: {fileID: 0}
-  slash2: {fileID: 0}
-  slash3: {fileID: 0}
   attackGateBehaviour: {fileID: 0}
+  heavySlash: {fileID: 0}
+  heavyChargeSeconds: 0.45
+  heavyAttackDuration: 0.55
+  heavyAttackCooldown: 0.8
+  heavyAttackRange: 2.5
+  heavyDamageMultiplier: 1.2
+  heavyLungeDistance: 2.5
+  heavyLungeHeight: 0.6
+  heavyLungeDuration: 0.25
+  heavyChargeParticles: {fileID: 0}
 --- !u!114 &7205059177896877071
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6932,6 +6977,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6490fc093a0f4f4bad127df5edd69cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  locomotionCrossFade: 0.045
+  combatCrossFade: 0.08
+  startAnimationHold: 0.14
+  brakeAnimationHold: 0.16
+  turnAnimationHold: 0.15
+  turnRetriggerDelay: 0.18
+  turnAnimationThreshold: 28
+  startLeanDegrees: 11
+  brakeLeanDegrees: 13
+  cruiseLeanDegrees: 2.5
+  turnBankDegrees: 14
+  turnTwistDegrees: 7
+  poseResponse: 22
+  poseRecovery: 16
 --- !u!114 &900263769713196785
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6963,6 +7022,8 @@ MonoBehaviour:
   baseMaterial: {fileID: 2100000, guid: cf0ff68832b83844092b975d9dba2aa1, type: 2}
   dissolveDashMaterial: {fileID: 2100000, guid: 1c704441cd8c746448c34a220fc69f0d, type: 2}
   dissolveDamageMaterial: {fileID: 2100000, guid: fc40dc0440d3b4b40ada6fb2d322efbb, type: 2}
+  veilSurgeMaterial: {fileID: 0}
+  deathMaterial: {fileID: 0}
   toggleAxe1: {fileID: 3377563207867171453}
   toggleAxe2: {fileID: 3348627264624504317}
   dissolveProperty: _Dissolve
@@ -7075,6 +7136,31 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e6419e55124941a4884fe5e301981a7a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &9007100512746543546
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9058840857134926188}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 87da0a466f806d74aadee0abce1fa7a2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  origin: {fileID: 0}
+--- !u!114 &2499930736866876953
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9058840857134926188}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02be04e829244cd43b7b3ba1811b20f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &9148504575843335381

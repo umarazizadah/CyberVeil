@@ -1,0 +1,67 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d56dd25e90deda44cb0871ef6218a915, type: 3}
+  m_Name: PlayerLightCombo
+  m_EditorClassIdentifier: 
+  defaultResetDelay: 0.65
+  steps:
+  - displayName: Left-to-right opener
+    animatorState: SlashAttack1
+    playbackSpeed: 1.45
+    crossFadeTime: 0.055
+    fallbackDuration: 0.98
+    damageMultiplier: 1
+    rangeMultiplier: 1
+    forwardImpulse: 0.22
+    comboResetDelayOverride: -1
+    slashVfx: 0
+    surgeSlashVfx: 14
+    vfxForwardDistance: 1
+    vfxLocalOffset: {x: 0, y: 0.8, z: 0}
+    vfxEulerOffset: {x: 0, y: -60, z: 0}
+    hitStopDuration: 0.005
+    hitStopTimeScale: 0
+    useSecondaryAxe: 0
+  - displayName: High-right diagonal
+    animatorState: SlashAttack2
+    playbackSpeed: 1.4
+    crossFadeTime: 0.05
+    fallbackDuration: 0.98
+    damageMultiplier: 1
+    rangeMultiplier: 1
+    forwardImpulse: 0.28
+    comboResetDelayOverride: -1
+    slashVfx: 1
+    surgeSlashVfx: 15
+    vfxForwardDistance: 1.2
+    vfxLocalOffset: {x: 0, y: 1, z: 1.2}
+    vfxEulerOffset: {x: 0, y: 0, z: -75}
+    hitStopDuration: 0.01
+    hitStopTimeScale: 0
+    useSecondaryAxe: 1
+  - displayName: Left-to-right finisher
+    animatorState: SlashAttack3
+    playbackSpeed: 1.55
+    crossFadeTime: 0.045
+    fallbackDuration: 0.98
+    damageMultiplier: 1
+    rangeMultiplier: 1
+    forwardImpulse: 0.36
+    comboResetDelayOverride: -1
+    slashVfx: 2
+    surgeSlashVfx: 16
+    vfxForwardDistance: 0
+    vfxLocalOffset: {x: 0, y: 1, z: 0}
+    vfxEulerOffset: {x: 20, y: -60, z: 0}
+    hitStopDuration: 0.04
+    hitStopTimeScale: 0
+    useSecondaryAxe: 0
